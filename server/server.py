@@ -6,6 +6,8 @@ import tornado.template
 # WS_HANDLERS maintains a list of currently-opened ws connections
 WS_HANDLERS = []
 
+# maintain message history for new connections
+MESSAGE_HISTORY = []
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
@@ -21,20 +23,24 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     def open(self):
         print 'connection opened.'
         WS_HANDLERS.append(self)
-        self.write_message("The server says Hello")
+        self.write_message("The server graciously welcomes you.")
+        self.write_message("Here are the past messages...")
+        for message in MESSAGE_HISTORY:
+            self.write_message(message)
 
     def on_message(self, message):
 
         # iterate over our list of connections and forward the message to each
         for ws_handler in WS_HANDLERS:
 
-            # if the connection we're about to send to is the one who sent the message
+            # if the connection we're about to send to is the one who sent the message...
             if ws_handler is self:
-                name = "You"  # refer to the client as "you"
+                name = "You"       # ...refer to the client as "you"
             else:
-                name = "A client"  # refer to the client as "A client"
+                name = "A client"  # otherwise refer to the client as "A client"
 
-            ws_handler.write_message("{} said:  {}".format(name, message))
+            MESSAGE_HISTORY.append("Past message:  {}".format(message))     # add the message to history
+            ws_handler.write_message("{} said:  {}".format(name, message))  # send the message.
 
         print 'message received:  {}'.format(message)
 
@@ -49,9 +55,9 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
 
 application = tornado.web.Application([
-    (r'/ws', WSHandler),
-    (r'/', MainHandler),
-    (r"/(.*)", tornado.web.StaticFileHandler, {"path": "./resources"}),
+    (r'/ws', WSHandler),  # endpoint for handling websocket connections
+    (r'/', MainHandler),  # endpoint for general entry
+    (r"/(.*)", tornado.web.StaticFileHandler, {"path": "./resources"}),  # still working out what this bad boy is.
 ])
 
 if __name__ == "__main__":
