@@ -22,11 +22,21 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
     def open(self):
         print 'connection opened.'
-        WS_HANDLERS.append(self)
         self.write_message("The server graciously welcomes you.")
-        self.write_message("Here are the past messages...")
+        self.write_message("There are {} other people here".format(str(len(WS_HANDLERS))))
+
+        if MESSAGE_HISTORY:
+            self.write_message("Here are the past messages...")
+
+        # send a dump of the message history to the new client
         for message in MESSAGE_HISTORY:
             self.write_message(message)
+
+        # let everyone else know there's a new client
+        for ws_handler in WS_HANDLERS:
+            ws_handler.write_message("Someone joined.  There are now {} people here".format(str(len(WS_HANDLERS) + 1)))
+
+        WS_HANDLERS.append(self)
 
     def on_message(self, message):
 
