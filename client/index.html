@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>WebSockets Client</title>  
+  <title>Dots and Boxes Multiplayer</title>
   <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 </head>
 <body>
@@ -23,16 +23,15 @@ jQuery(function($){
     setup();
   }
 
-
   function setup(){
-   
-    // Note: You have to change the host var 
+
+    // Note: You have to change the host var
     // if your client runs on a different machine than the websocket server
-    
+
     var host = "ws://localhost:9090/ws";
     var socket = new WebSocket(host);
-    //console.log("socket status: " + socket.readyState);   
-    
+    //console.log("socket status: " + socket.readyState);
+
     var $txt = $("#data");
     var $btnSend = $("#sendtext");
 
@@ -45,7 +44,7 @@ jQuery(function($){
         return;
       }
       socket.send(text);
-      $txt.val("");    
+      $txt.val("");
     });
 
     $txt.keypress(function(evt){
@@ -77,8 +76,8 @@ jQuery(function($){
     function showServerResponse(txt){
       var p = document.createElement('p');
       p.innerHTML = txt;
-      document.getElementById('output').appendChild(p); 
-    }	
+      document.getElementById('output').appendChild(p);
+    }
 
 
   }

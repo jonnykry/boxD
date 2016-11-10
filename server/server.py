@@ -6,12 +6,12 @@ import tornado.template
 class MainHandler(tornado.web.RequestHandler):
   def get(self):
     loader = tornado.template.Loader(".")
-    self.write(loader.load("index.html").generate())
+    self.write(loader.load("../client/index.html").generate())
 
 class WSHandler(tornado.websocket.WebSocketHandler):
   def check_origin(self, origin):
     return True
-  
+
   def open(self):
     print 'connection opened...'
     self.write_message("The server says: 'Hello'. Connection was accepted.")
