@@ -18,8 +18,8 @@ class Board(object):
     def __init__(self, rows, cols):
         self.rows = rows
         self.cols = cols
-        self.edges = {}  # maps edges to edge owner (board[p1][p2] = Owner)
-        self.boxes = {}  # maps top-left point of each box to box owner
+        self._edges = {}  # maps edges to edge owner (board[p1][p2] = Owner)
+        self._boxes = {}  # maps top-left point of each box to box owner
 
         self._reset_board()
 
@@ -29,20 +29,49 @@ class Board(object):
     '' Adds unowned edges to each possible position on the board
     '''
     def _reset_board(self):
-        self.boxes = {}
+        self._boxes = {}
         for r in range(0, self.rows):
             for c in range(0, self.cols):
 
-                if not (r, c) in self.edges:
-                    self.edges[(r, c)] = {}
+                if not (r, c) in self._edges:
+                    self._edges[(r, c)] = {}
 
                 # add an un-owned edge from the current node to the node below and to the right
                 # do not add an edge that goes out of bounds (r + 1 exceeds rows, c + 1 exceeds cols)
                 if not c == self.cols - 1:
-                    self.edges[(r, c)][(r, c + 1)] = None
+                    self._edges[(r, c)][(r, c + 1)] = None
 
                 if not r == self.rows - 1:
-                    self.edges[(r, c)][(r + 1, c)] = None
+                    self._edges[(r, c)][(r + 1, c)] = None
+
+    '''
+    '' Returns the owner of the edge (p1, p2)
+    ''  p1:     A tuple describing source node (row, col)
+    ''  p2:     A tuple describing target node (row, col)
+    ''
+    ''  Returns the owner of the edge, or None if the edge is unowned
+    '''
+    def get_edge_owner(self, p1, p2):
+
+        if len(p1) != 2 or len(p2) != 2:
+            raise ValueError("A point was not a tuple of len 2: {}, {}".format(p1, p2))
+
+        if not self._is_valid_edge(p1, p2):
+            raise ValueError("Edge is not valid:  {}, {}".format(str(p1), str(p2)))
+
+        p1, p2 = self._coerce_points(p1, p2)
+
+        return self._edges[p1][p2]
+
+    '''
+    '' Returns True if the edge (p1, p2) is owned
+    ''  p1:     A tuple describing source node (row, col)
+    ''  p2:     A tuple describing target node (row, col)
+    ''
+    ''  Returns the owner of the edge, or None if the edge is unowned
+    '''
+    def edge_is_owned(self, p1, p2):
+        return self.get_edge_owner(p1, p2) is not None
 
     '''
     '' Claims an unowned edge from p1 to p2
@@ -69,15 +98,15 @@ class Board(object):
             raise ValueError("Edge is not valid:  {}, {}".format(str(p1), str(p2)))
 
         p1, p2 = self._coerce_points(p1, p2)
-        if p1 not in self.edges:
-            self.edges[p1] = {}
+        if p1 not in self._edges:
+            self._edges[p1] = {}
 
-        if self.edges[p1][p2]:
+        if self._edges[p1][p2]:
             raise
 
         created_boxes = self._get_new_boxes(p1, p2)
 
-        self.edges[p1][p2] = owner
+        self._edges[p1][p2] = owner
 
         # TODO:  implement _get_new_boxes
         # for box in created_boxes:
