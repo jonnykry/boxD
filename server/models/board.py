@@ -8,6 +8,8 @@
 '    { sourcePoint1: {neighboringPoint1: owner, neighboringPoint2: owner}, sourcePoint2: ... }
 '
 '    where each point is a row-majored tuple of 2 integers describing the row and column of the point.
+'
+'  completed boxes are maintained in a map mapping the top-left corner of the box to the owner of the box
 """
 
 
