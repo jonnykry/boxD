@@ -1,4 +1,13 @@
 # don't track emacs tmp files
 *~
+\#*
 
+# don't track virtual env stuff
 venv
+
+# don't track intellij-related files
+.idea/*
+*.iml
+
+# don't track compiled python files
+*.pyc
