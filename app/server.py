@@ -6,7 +6,7 @@ import tornado.template
 class MainHandler(tornado.web.RequestHandler):
   def get(self):
     loader = tornado.template.Loader(".")
-    self.write(loader.load("../client/index.html").generate())
+    self.write(loader.load("client/index.html").generate())
 
 class WSHandler(tornado.websocket.WebSocketHandler):
   def check_origin(self, origin):
@@ -26,7 +26,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 application = tornado.web.Application([
   (r'/ws', WSHandler),
   (r'/', MainHandler),
-  (r"/(.*)", tornado.web.StaticFileHandler, {"path": "./resources"}),
+  (r'/css/(.*)', tornado.web.StaticFileHandler, {path='static/css'})
 ])
 
 if __name__ == "__main__":
