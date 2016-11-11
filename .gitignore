@@ -9,3 +9,5 @@ venv
 .idea/*
 *.iml
 
+# don't track compiled python files
+*.pyc

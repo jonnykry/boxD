@@ -18,8 +18,8 @@ class Board(object):
     def __init__(self, rows, cols):
         self.rows = rows
         self.cols = cols
-        self._edges = {}  # maps edges to edge owner (board[p1][p2] = Owner)
-        self._boxes = {}  # maps top-left point of each box to box owner
+        self.__edges = {}  # maps edges to edge owner (board[p1][p2] = Owner)
+        self.__boxes = {}  # maps top-left point of each box to box owner
 
         self._reset_board()
 
@@ -29,20 +29,20 @@ class Board(object):
     '' Adds unowned edges to each possible position on the board
     '''
     def _reset_board(self):
-        self._boxes = {}
+        self.__boxes = {}
         for r in range(0, self.rows):
             for c in range(0, self.cols):
 
-                if not (r, c) in self._edges:
-                    self._edges[(r, c)] = {}
+                if not (r, c) in self.__edges:
+                    self.__edges[(r, c)] = {}
 
                 # add an un-owned edge from the current node to the node below and to the right
                 # do not add an edge that goes out of bounds (r + 1 exceeds rows, c + 1 exceeds cols)
                 if not c == self.cols - 1:
-                    self._edges[(r, c)][(r, c + 1)] = None
+                    self.__edges[(r, c)][(r, c + 1)] = None
 
                 if not r == self.rows - 1:
-                    self._edges[(r, c)][(r + 1, c)] = None
+                    self.__edges[(r, c)][(r + 1, c)] = None
 
     '''
     '' Returns the owner of the edge (p1, p2)
@@ -56,12 +56,12 @@ class Board(object):
         if len(p1) != 2 or len(p2) != 2:
             raise ValueError("A point was not a tuple of len 2: {}, {}".format(p1, p2))
 
-        if not self._is_valid_edge(p1, p2):
+        if not self.__is_valid_edge(p1, p2):
             raise ValueError("Edge is not valid:  {}, {}".format(str(p1), str(p2)))
 
-        p1, p2 = self._coerce_points(p1, p2)
+        p1, p2 = self.__coerce_points(p1, p2)
 
-        return self._edges[p1][p2]
+        return self.__edges[p1][p2]
 
     '''
     '' Returns True if the edge (p1, p2) is owned
@@ -81,7 +81,7 @@ class Board(object):
     ''  player: the owner of the new edge
     ''
     ''  This implementation coerces the source node to always be above or to the left of the destination node
-    ''    eg: if claim_edge((1, 1), (0, 1), PLAYER) is called, board[(0, 1)][(1, 1)] is assigned to PLAYER
+    ''    eg: if claim_edge((1, 1), (0, 1), PLAYER) is called, edges[(0, 1)][(1, 1)] is assigned to PLAYER
     ''
     ''  Raises an ValueError if the edge is already owned
     ''  Raises a ValueError if the edge isn't between two adjacent nodes
@@ -94,19 +94,19 @@ class Board(object):
         if not owner:
             raise ValueError("Owner should not be None")
 
-        if not self._is_valid_edge(p1, p2):
+        if not self.__is_valid_edge(p1, p2):
             raise ValueError("Edge is not valid:  {}, {}".format(str(p1), str(p2)))
 
-        p1, p2 = self._coerce_points(p1, p2)
-        if p1 not in self._edges:
-            self._edges[p1] = {}
+        p1, p2 = self.__coerce_points(p1, p2)
+        if p1 not in self.__edges:
+            self.__edges[p1] = {}
 
-        if self._edges[p1][p2]:
+        if self.__edges[p1][p2]:
             raise
 
-        created_boxes = self._get_new_boxes(p1, p2)
+        created_boxes = self.__get_new_boxes(p1, p2)
 
-        self._edges[p1][p2] = owner
+        self.__edges[p1][p2] = owner
 
         # TODO:  implement _get_new_boxes
         # for box in created_boxes:
@@ -120,7 +120,7 @@ class Board(object):
     ''
     ''  Throws an ValueError if the edge already exists on the board
     '''
-    def _get_new_boxes(self, p1, p2):
+    def __get_new_boxes(self, p1, p2):
         pass
 
     '''
@@ -128,7 +128,7 @@ class Board(object):
     ''    That is to say, returns True if the two points provided are immediately adjacent to each other
     '''
     @staticmethod
-    def _is_valid_edge(p1, p2):
+    def __is_valid_edge(p1, p2):
 
         # if the difference in two points' x is 1 or -1   XOR
         # the difference in two points' y is 1 or -1, then the points are either immediately above or beside each other
@@ -140,7 +140,7 @@ class Board(object):
     ''    Otherwise returns p2, p1
     '''
     @staticmethod
-    def _coerce_points(p1, p2):
+    def __coerce_points(p1, p2):
 
         if p1[0] == p2[0]:
             if p1[1] < p2[1]:
