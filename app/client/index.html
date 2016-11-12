@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dots and Boxes Multiplayer</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css" integrity="sha384-AysaV+vQoT3kOAXZkl02PThvDr8HYKPZhNT5h/CXfBThSRXQ6jW5DO2ekP5ViFdi" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/js/bootstrap.min.js" integrity="sha384-BLiI7JTZm+JWlgKa0M0kGRpJbF2J8q+qreVrKBC47e3K6BW78kGLrCkeRX6I9RoK" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="game">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4">
+          <!-- Button trigger modal -->
+          <button type="button" class="btn btn-secondary btn-lg" data-toggle="modal" data-target="#entryModal">
+            Launch Test Modal
+          </button>
+        </div>
+      </div>
+  </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="entryModal" tabindex="-1" role="dialog" aria-labelledby="entryModal" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+                  <h4 class="modal-title" id="entryModalTitle">Modal title</h4>
+              </div>
+              <div class="modal-body">
+                  <div id="send" class="container">
+                      Enter text to send to the websocket server:
+                      <input type="text" id="data" /><br>
+                      <input type="button" id="sendtext" value="Send Text" class="btn btn-secondary"/>
+                      <div id="output"></div>
+                  </div>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+          </div>
+      </div>
+  </div>
+</body>
+</html>
+<script>
+
+jQuery(function($){
+    $('#entryModal').modal({show: true});
+
+    if (!("WebSocket" in window)) {
+        alert("Your browser does not support web sockets");
+    } else {
+        setup();
+    }
+
+  function setup(){
+
+    // Note: You have to change the host var
+    // if your client runs on a different machine than the websocket server
+
+    var host = "ws://localhost:9090/ws";
+    var socket = new WebSocket(host);
+    //console.log("socket status: " + socket.readyState);
+
+    var $txt = $("#data");
+    var $btnSend = $("#sendtext");
+
+    $txt.focus();
+
+    // event handlers for UI
+    $btnSend.on('click',function(){
+      var text = $txt.val();
+      if(text == ""){
+        return;
+      }
+      socket.send(text);
+      $txt.val("");
+    });
+
+    $txt.keypress(function(evt){
+      if(evt.which == 13){
+        $btnSend.click();
+      }
+    });
+
+    // event handlers for websocket
+    if(socket){
+
+      socket.onopen = function(){
+        //alert("connection opened....");
+      }
+
+      socket.onmessage = function(msg){
+        showServerResponse(msg.data);
+      }
+
+      socket.onclose = function(){
+        //alert("connection closed....");
+        showServerResponse("The connection has been closed.");
+      }
+
+    }else{
+      console.log("invalid socket");
+    }
+
+    function showServerResponse(txt){
+      var p = document.createElement('p');
+      p.innerHTML = txt;
+      document.getElementById('output').appendChild(p);
+    }
+
+
+  }
+
+});
+
+</script>
