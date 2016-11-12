@@ -1,0 +1,24 @@
+language: python
+before_install:
+- mkdir -p server/lib
+install:
+- pip install -r server/requirements.txt -t server/lib/
+script:
+- echo "No Script to run"
+notifications:
+  email:
+  - gtharris@iastate.edu
+  slack:
+    secure: lIwXc6cx3Dzwd+ryzvxCYT/Ckl5c0kXTgSPMQExF9r8zZaQ8APBq7W/dH+YVqpMhvCK65DxTf5+yxTpj8o3PrvfBOOMvDmRqyM1+pcCrumS1TvG3hd7OQ9ikC3K1JPEjejVHjVaGb6wZkTUQmSYxNXXYkAbP6IkG3iV5D/3fB/O/MFE5aaAnWXkUYbQexJAfQbzJc0HZrUWv8owuVG97EZSDgA2/nblhYOFKmt3tmzSRUs8pjuYO7KW0OeTClcqowqxjZ/Spt8QdkuEs2EIYaI8illhKtJPE7w6YbC+7cYh6gGXuDpnh5J4ur2AqbafcpHmZ71blHgRehMeJTH3f0Wn+TKly9hqw+YIrqp7DoaSX4u/GskeTLJ7ijJXwUU3zeKlLu11sFcnmv/ciVS+naT4aznmqKpmE/x3eeSUfm/Rk42uzGVUjYAIMFf31+KbdbeusLkFpzeoA3TGijalqW3rD0xc4V/+W2bHgTdp8u5xE5F/iJ+DrPyxEax0wsxJrtmBZU1Khobulsq1+kxy4TfFYV2Njbp6YQQ3Un3vmn+2ZVUV6s4/MaWwdCiylVK2fGezyRobrmA7Qou80+aA5oR6jpra+A+zf04W0jDQrBV2c1ovuX+nq53QXn4OqZIRfcvNjnHk94I4YCM9KsXr4cvuC6cdIOyRB6KMtBudvKow=
+branches:
+  only:
+  - sam_dev
+  - jonny-dev
+  - master
+  - gtharris-dev
+
+# TODO setup deploy
+deploy:
+  provider: gae
+  keyfile: client-secret.json
+  project: boxd-test
