@@ -5,7 +5,7 @@ before_install:
   -in keys/boxd-prod-gae.json.enc -out keys/boxd-prod-gae.json -d
 -  mkdir lib
 install:
-- pip install-r server/requirements.txt -t lib/ 
+- pip install -r server/requirements.txt -t lib/ 
 script:
 - echo "Starting Server"
 - echo "Pip results"
