@@ -3,9 +3,9 @@ cache: pip
 before_install:
 - openssl aes-256-cbc -K $encrypted_fdf799882781_key -iv $encrypted_fdf799882781_iv
   -in keys/boxd-prod-gae.json.enc -out keys/boxd-prod-gae.json -d
--  mkdir server/lib
+-  mkdir lib
 install:
-- pip install -t lib -r server/requirements.txt 
+- pip install -t lib -r server/requirements.txt
 script:
 - echo "Starting Server"
 - echo "Pip results"
