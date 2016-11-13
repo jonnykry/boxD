@@ -1,3 +1,4 @@
+from google.appengine.ext import vendor
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
