@@ -1,6 +1,5 @@
 # don't track emacs tmp files
 *~
-\#*
 
 # don't track virtual env stuff
 venv
