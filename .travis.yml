@@ -4,9 +4,9 @@ sudo: required
 before_install:
 - openssl aes-256-cbc -K $encrypted_fdf799882781_key -iv $encrypted_fdf799882781_iv
   -in keys/boxd-prod-gae.json.enc -out keys/boxd-prod-gae.json -d
-- sudo mkdir lib
+- sudo mkdir server/lib
 install:
-- sudo pip install -r app/requirements.txt -t lib/
+- sudo pip install -r server/requirements.txt -t server/lib/
 script:
 - echo "Starting Server"
 - echo "Pip results"

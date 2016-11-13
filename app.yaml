@@ -4,4 +4,4 @@ threadsafe: false
 
 handlers:
 - url: /.*
-  script: app/server.py
+  script: server/server.py
