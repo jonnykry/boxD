@@ -6,7 +6,8 @@ before_install:
 install:
 - pip install -r app/requirements.txt -t server/lib/
 script:
-- echo "No Script to run"
+- echo "Starting Server"
+- cd app && python server.py
 notifications:
   email: false
   slack:
