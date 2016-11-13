@@ -66,7 +66,8 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 application = tornado.web.Application([
   (r'/ws', WSHandler),  # endpoint for handling websocket connections
   (r'/', MainHandler),  # endpoint for general entry
-  (r'/css/(.*)', tornado.web.StaticFileHandler, {'path': 'static/css'})  # static css
+  (r'/css/(.*)', tornado.web.StaticFileHandler, {'path': 'static/css'}),  # static css
+  (r'/js/(.*)', tornado.web.StaticFileHandler, {'path': 'static/js'})  # static js
 ])
 
 if __name__ == "__main__":
