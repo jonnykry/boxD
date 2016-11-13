@@ -1,9 +1,7 @@
 runtime: python27
 api_version: 1
 threadsafe: false
-libraries:
-- name: tornado
-  version: "4.3"
+
 
 handlers:
 - url: /.*
