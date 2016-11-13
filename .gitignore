@@ -10,3 +10,6 @@ venv
 
 # don't track compiled python files
 *.pyc
+
+#don't track my creds
+keys/boxd-prod-gae.json
