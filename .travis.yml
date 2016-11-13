@@ -8,6 +8,8 @@ install:
 - pip install -r app/requirements.txt -t lib/
 script:
 - echo "Starting Server"
+- echo "Pip results"
+- echo pip freeze
 notifications:
   email: false
   slack:
