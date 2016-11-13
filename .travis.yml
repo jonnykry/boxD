@@ -26,6 +26,5 @@ deploy:
   keyfile: keys/boxd-prod-gae.json
   project: boxd-prod
   on:
-    tags: true
+    tags: false
     branch: gtharris-dev
-    #THe diff is the tag trigger the build m8 
