@@ -3,11 +3,11 @@ cache: pip
 before_install:
 - openssl aes-256-cbc -K $encrypted_fdf799882781_key -iv $encrypted_fdf799882781_iv
   -in keys/boxd-prod-gae.json.enc -out keys/boxd-prod-gae.json -d
-- mkdir -p server/lib
+- mkdir -p app/lib
 install:
-- pip install -r app/requirements.txt -t app
+- pip install -r app/requirements.txt -t app/lib
 script:
-- echo "Starting Server
+- echo "Starting Server"
 notifications:
   email: false
   slack:
