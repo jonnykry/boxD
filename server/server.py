@@ -1,4 +1,4 @@
-import tornado.ioloop
+from ../lib import tornado.ioloop
 import tornado.web
 import tornado.websocket
 import tornado.template
