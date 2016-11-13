@@ -23,4 +23,4 @@ deploy:
   project: boxd-prod
   on:
     tags: false
-    branch: master
+    branch: gtharris-dev
