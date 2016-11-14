@@ -1,3 +1,4 @@
+import os
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
@@ -71,5 +72,5 @@ application = tornado.web.Application([
 
 if __name__ == "__main__":
     print 'starting'
-    application.listen(9090)
+    application.listen(os.environ.get("PORT", 5000))
     tornado.ioloop.IOLoop.instance().start()
