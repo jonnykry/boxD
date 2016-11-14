@@ -1,7 +1,7 @@
 
 # TODO:  make this an actual unit test file
 
-from board import Board
+from server.models.board import Board
 
 
 def main():
