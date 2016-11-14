@@ -1,7 +1,10 @@
+import os
+import tornado.ioloop
+import tornado.web
+import tornado.websocket
 from boxd_api import BoxdApi, SocketConnection
 import boxd_runner
 import tornado.template
-import tornado.web
 import tornado.ioloop
 
 
@@ -19,6 +22,7 @@ application = tornado.web.Application([
 
 if __name__ == "__main__":
     print 'starting'
+    application.listen(os.environ.get("PORT", 5000))
     BoxdApi.create()
     boxd_runner.GameRunner.create()
     application.listen(9090)
