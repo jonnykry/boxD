@@ -2,10 +2,11 @@ import os
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
-from boxd_api import ConnectionManager, SocketConnection
-import boxd_runner
 import tornado.template
 import tornado.ioloop
+
+import boxd_api
+import boxd_runner
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -16,7 +17,7 @@ class MainHandler(tornado.web.RequestHandler):
 
 
 application = tornado.web.Application([
-    (r'/ws', SocketConnection),  # endpoint for handling websocket connections
+    (r'/ws', boxd_api.SocketConnection),  # endpoint for handling websocket connections
     (r'/', MainHandler),  # endpoint for general entry
     (r'/css/(.*)', tornado.web.StaticFileHandler, {'path': './../client/static/css'}),  # static css
  ])
@@ -24,7 +25,7 @@ application = tornado.web.Application([
 if __name__ == "__main__":
     print 'starting'
     application.listen(os.environ.get("PORT", 5000))
-    ConnectionManager.create()
+    boxd_api.ConnectionManager.create()
     boxd_runner.GameRunner.create()
     tornado.ioloop.IOLoop.instance().start()
 

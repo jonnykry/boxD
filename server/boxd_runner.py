@@ -1,5 +1,4 @@
-import game.game as game
-
+import game.boxd_game
 
 class GameRunner(object):
 
@@ -12,11 +11,14 @@ class GameRunner(object):
             self.running_games = []
             self.players = {}
 
+        def get_player_ids(self):
+            return self.players.keys()
+
         def assign_player(self, player_id):
 
             # todo:  grow number of running games and actually pick the best game to assign
             if not self.running_games:
-                self.running_games.append(game.BoxdGame())
+                self.running_games.append(game.boxd_game.BoxdGame())
 
             best_game = self.running_games[0]
 
@@ -36,19 +38,34 @@ class GameRunner(object):
             game = self.player_game_map[client_id]
             self.player_game_map.pop(client_id)
 
+            self.players.pop(client_id)
+
             # if game is empty, shut it down.
             if not game.get_players():
                 self.running_games.remove(game)
 
+        def change_player_nickname(self, player_id, nickname):
+            self.players[player_id].name = nickname
+
+        def claim_line(self, player_id, p1_r, p1_c, p2_r, p2_c):
+            # TODO:  Error checking
+            players_game = self.player_game_map[player_id]
+            pt1 = (p1_r, p1_c)
+            pt2 = (p2_r, p2_c)
+            return players_game.claim_line(pt1, pt2, player_id)
+
+        def get_players(self, player_id):
+
+            players_game = self.player_game_map[player_id]
+            return players_game.get_players()
 
 
     @staticmethod
     def claim_line(player_id, p1_r, p1_c, p2_r, p2_c):
-        return GameRunner.__instance.player_game_map[player_id].claim_line((p1_r, p1_c), (p2_r, p2_c), player_id)
+        return GameRunner.__instance.claim_line(player_id, p1_r, p1_c, p2_r, p2_c)
 
     @staticmethod
     def assign_player(player_id):
-        # TODO:  Error checking
         return GameRunner.__instance.assign_player(player_id)
 
     @staticmethod
@@ -58,15 +75,19 @@ class GameRunner(object):
     @staticmethod
     def update_player_name(player_id, name):
         # TODO:  Error checking
-        GameRunner.__instance.player_game_map[player_id].change_player_nickname(player_id, name)
+        GameRunner.__instance.change_player_nickname(player_id, name)
 
     @staticmethod
-    def get_other_players(player_id):
-        return GameRunner.__instance.player_game_map[player_id].get_players()
+    def get_players_from_game(player_id):
+        return GameRunner.__instance.get_players(player_id)
 
     @staticmethod
     def running_games():
         return len(GameRunner.__instance.running_games)
+
+    @staticmethod
+    def get_player_ids():
+        return GameRunner.__instance.get_player_ids()
 
     @staticmethod
     def create():

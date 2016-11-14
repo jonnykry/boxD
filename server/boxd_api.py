@@ -1,6 +1,5 @@
 import tornado.websocket
-# import server.
-
+from boxd_runner import GameRunner
 
 class ConnectionManager(object):
 
@@ -88,6 +87,9 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
 
         # register connection
         ConnectionManager.register_connection(self.client_id, self)
+
+        #
+        GameRunner.assign_player(self.client_id)
 
         print 'connection opened:  {}'.format(str(self.client_id))
 
