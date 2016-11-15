@@ -31,15 +31,15 @@ var Board = {
             this.context.moveTo(0,i*100+100);
             this.context.lineTo(this.maxRows *100,i*100+100);
             this.context.stroke();
-            }
+        }
         for(var c=0; c<this.maxCols;c++){
             for(var r=0; r<this.maxRows;r++){
                 this.context.strokeStyle= 'black';
                 this.context.beginPath();
                 this.context.arc(r*100+100,c*100+100,10,0,2*Math.PI);
                 this.context.stroke();
-                }
             }
+        }
      },
     // edge = {src: {x: int, y: int}, dst: {x: int, y: int}, owner: String}
     claimEdge: function(p1, p2, owner) {
@@ -68,7 +68,7 @@ function edge(x,y,x2,y2,color) {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x*100 -4, this.y*100-4,(this.x2-this.x)*100+4,(this.y2-this.y)*100+4);
         ctx.restore();
-        }
+    }
 }
 
 var camera = {
@@ -87,23 +87,23 @@ function updateBoard(){
 	Board.cursor.update();
 	for(var i=0; i< Board.edges.length;i++){
 		Board.edges[i].update();
-		}
+    }
     if (Board.curx>(Board.canvas.width-100) && camera.x>-3000) {
         camera.x-=10
         moveContext();
-        }
+    }
     else if (Board.curx<(100)&& camera.x<0) {
         camera.x+=10
         moveContext();
-        }
+    }
     if (Board.cury>(Board.canvas.height-100) && camera.y>-3000){
         camera.y-=10
         moveContext();
-        }
+    }
     else if (Board.cury<(100) && camera.y<0) {
         camera.y+=10
         moveContext();
-        }
+    }
 }
 
 Board.canvas.addEventListener('mousedown',function(e) {
@@ -120,31 +120,31 @@ Board.canvas.addEventListener('mousedown',function(e) {
     //get second point
     if ((mousex%100)>=(mousey%100) && mousex%100 <50 && mousey%100 <50) {
         pointx2 = parseInt(pointx)+1;
-        }
+    }
     else if ((mousex%100)<(mousey%100) && mousex%100 <50 && mousey%100 <50){
         pointy2 = parseInt(pointy)+1;
-        }
+    }
 
     if ((mousex%100)>=(mousey%100) && mousex%100 >=50 && mousey%100 <50){
         pointx2 = parseInt(pointx)-1;
-        }
+    }
     else if ((mousex%100)<(mousey%100) && mousex%100 >=50 && mousey%100 <50){
         pointy2 = parseInt(pointy)+1;
-        }
+    }
 
     if ((mousex%100)>=(mousey%100) && mousex%100 <50 && mousey%100 >=50){
         pointx2 = parseInt(pointx)-1;
-        }
+    }
     else if ((mousex%100)<(mousey%100) && mousex%100 <50 && mousey%100 >=50) {
         pointy2 = parseInt(pointy)-1;
-        }
+    }
 
     if ((mousex%100)<(mousey%100) && mousex%100 >=50 && mousey%100 >=50){
         pointx2 = parseInt(pointx)-1;
-        }
+    }
     else if ((mousex%100)>=(mousey%100) && mousex%100 >=50 && mousey%100 >=50) {
         pointy2 = parseInt(pointy)-1;
-        }
+    }
     Board.edges.push(new edge(pointx,pointy,pointx2,pointy2,'blue'));
 
 });
@@ -165,30 +165,30 @@ Board.canvas.addEventListener('mousemove',function(e) {
     //get second point
     if ((mousex%100)>=(mousey%100) && mousex%100 <50 && mousey%100 <50) {
         pointx2 = parseInt(pointx)+1;
-        }
+    }
     else if ((mousex%100)<(mousey%100) && mousex%100 <50 && mousey%100 <50){
         pointy2 = parseInt(pointy)+1;
-        }
+    }
 
     if ((mousex%100)>=(mousey%100) && mousex%100 >=50 && mousey%100 <50){
         pointx2 = parseInt(pointx)-1;
-        }
+    }
     else if ((mousex%100)<(mousey%100) && mousex%100 >=50 && mousey%100 <50){
         pointy2 = parseInt(pointy)+1;
-        }
+    }
 
     if ((mousex%100)>=(mousey%100) && mousex%100 <50 && mousey%100 >=50){
         pointx2 = parseInt(pointx)-1;
-        }
+    }
     else if ((mousex%100)<(mousey%100) && mousex%100 <50 && mousey%100 >=50) {
         pointy2 = parseInt(pointy)-1;
-        }
+    }
 
     if ((mousex%100)<(mousey%100) && mousex%100 >=50 && mousey%100 >=50){
         pointx2 = parseInt(pointx)-1;
-        }
+    }
     else if ((mousex%100)>=(mousey%100) && mousex%100 >=50 && mousey%100 >=50) {
         pointy2 = parseInt(pointy)-1;
-        }
+    }
     Board.cursor = new edge(pointx,pointy,pointx2,pointy2,'yellow');
 })
