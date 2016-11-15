@@ -1,6 +1,5 @@
 # don't track emacs tmp files
 *~
-\#*
 
 # don't track virtual env stuff
 venv
@@ -11,3 +10,6 @@ venv
 
 # don't track compiled python files
 *.pyc
+
+#don't track my creds
+keys/boxd-prod-gae.json

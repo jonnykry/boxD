@@ -1,3 +1,4 @@
+
 $(document).ready( function() {
     var board = Board.init();
 
@@ -17,11 +18,30 @@ $(document).ready( function() {
         setup();
     }
 
+    function getParameterByName(name, url) {
+        if (!url) {
+            url = window.location.href;
+        }
+
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+
     function setup(){
         // Note: You have to change the host var
         // if your client runs on a different machine than the websocket server
 
-        var host = "ws://localhost:9090/ws";
+        var host;
+        if (getParameterByName('local') == 'true') {
+            host = "ws://localhost:5000/ws"
+        } else {
+            host = "wss://boxd.herokuapp.com/ws";
+        }
+
         var socket = new WebSocket(host);
         //console.log("socket status: " + socket.readyState);
 
