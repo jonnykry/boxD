@@ -15,12 +15,12 @@ var Board = {
     },
 
     init: function() {
-        this.canvas.width =  window.innerWidth;
-        this.canvas.height =  window.innerHeight;
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
-        this.interval = setInterval(updateBoard, 20);
+        this.interval = setInterval(updateBoard, 1000/60);
 
         return this;
     },
@@ -90,8 +90,8 @@ function updateBoard() {
     if (Board.cury>(Board.canvas.height-100) && Board.camera.y>-3000){
         Board.camera.y-=10;
         Board.moveContext();
-    } else if (this.cury<(100) && this.camera.y<0) {
-        this.camera.y+=10;
+    } else if (Board.cury<(100) && Board.camera.y<0) {
+        Board.camera.y+=10;
         Board.moveContext();
     }
 }
