@@ -1,4 +1,6 @@
 import game.boxd_game
+import traceback
+import sys
 
 class GameRunner(object):
 
@@ -52,17 +54,33 @@ class GameRunner(object):
             players_game = self.player_game_map[player_id]
             pt1 = (p1_r, p1_c)
             pt2 = (p2_r, p2_c)
-            return players_game.claim_line(pt1, pt2, player_id)
+
+            try:
+                new_boxes = players_game.claim_line(pt1, pt2, player_id)
+            except game.boxd_game.EdgeOwnedError:
+                print "Race condition happened"
+                return None
+            except ValueError:
+                traceback.print_exc(file=sys.stdout)
+                return None
+
+            return new_boxes
 
         def get_players(self, player_id):
-
             players_game = self.player_game_map[player_id]
             return players_game.get_players()
+
+        def get_player_name(self, player_id):
+            player = self.players[player_id]
+            return player.name
 
 
     @staticmethod
     def claim_line(player_id, p1_r, p1_c, p2_r, p2_c):
-        return GameRunner.__instance.claim_line(player_id, p1_r, p1_c, p2_r, p2_c)
+        new_boxes = GameRunner.__instance.claim_line(player_id, p1_r, p1_c, p2_r, p2_c)
+        if new_boxes is None:
+            return None
+        return list(new_boxes)
 
     @staticmethod
     def assign_player(player_id):
@@ -79,7 +97,7 @@ class GameRunner(object):
 
     @staticmethod
     def get_players_from_game(player_id):
-        return GameRunner.__instance.get_players(player_id)
+        return list(GameRunner.__instance.get_players(player_id))
 
     @staticmethod
     def running_games():
@@ -87,7 +105,17 @@ class GameRunner(object):
 
     @staticmethod
     def get_player_ids():
-        return GameRunner.__instance.get_player_ids()
+        return list(GameRunner.__instance.get_player_ids())
+
+    @staticmethod
+    def get_other_player_ids(player_id):
+        players = list(GameRunner.get_players_from_game(player_id))
+        players.remove(player_id)
+        return players
+
+    @staticmethod
+    def get_player_name(player_id):
+        return GameRunner.__instance.get_player_name(player_id)
 
     @staticmethod
     def create():
