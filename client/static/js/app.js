@@ -1,6 +1,6 @@
 
 $(document).ready( function() {
-    var Board = board.init();
+    var board = Board.init();
 
     // Temporarily testing board/game here, though we should move this to another file ran serparately
    // board.claimEdge({x: 3, y: 2}, {x: 3, y: 3}, 'Blake');
