@@ -25,12 +25,7 @@ application = tornado.web.Application([
 
 if __name__ == "__main__":
     print 'starting'
-<<<<<<< HEAD
-    application.listen(8080)
-=======
     application.listen(os.environ.get("PORT", 5000))
     boxd_api.ConnectionManager.create()
     boxd_runner.GameRunner.create()
->>>>>>> f44dac06f8528d2441a8179e9ac828ce47180d1c
     tornado.ioloop.IOLoop.instance().start()
-
