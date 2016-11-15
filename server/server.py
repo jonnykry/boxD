@@ -20,6 +20,7 @@ application = tornado.web.Application([
     (r'/ws', boxd_api.SocketConnection),  # endpoint for handling websocket connections
     (r'/', MainHandler),  # endpoint for general entry
     (r'/css/(.*)', tornado.web.StaticFileHandler, {'path': './../client/static/css'}),  # static css
+    (r'/js/(.*)', tornado.web.StaticFileHandler, {'path': './../client/static/js'}),  # static js
  ])
 
 if __name__ == "__main__":
