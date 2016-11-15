@@ -1,5 +1,8 @@
-from google.appengine.ext import vendor
-from vendor import tornado
+from google.appengine.ext import tor
+import tornado.ioloop
+import tornado.web
+import tornado.websocket
+import tornado.template
 
 # WS_HANDLERS maintains a list of currently-opened ws connections
 WS_HANDLERS = []
