@@ -140,7 +140,8 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
 
                 responses = []
 
-                if new_boxes is not None:
+                # TODO:  Have errors propagate to this method instead of returning None
+                if new_boxes is not None:  # None means an Error occurred. [] means there are no new boxes
 
                     responses.append(messages.LineClaimedMessage((p1r, p1c), (p2r, p2c), self.client_id))
 
@@ -149,8 +150,6 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
 
                     for response in responses:
                         ConnectionManager.send_to_all(GameRunner.get_players_from_game(self.client_id), json.dumps(response.get_message()))
-
-
 
     def on_close(self):
 
