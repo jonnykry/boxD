@@ -1,6 +1,7 @@
 import tornado.websocket
-import copy
+import json
 from boxd_runner import GameRunner
+from models import message as messages
 
 
 class ConnectionManager(object):
@@ -55,6 +56,9 @@ class ConnectionManager(object):
 
         def remove_connection(self, client_id):
 
+            if not client_id in self.connections:
+                raise ValueError("Client id was not registered:  {}".format(client_id))
+
             self.connections.pop(client_id)
 
 
@@ -105,18 +109,59 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
         print 'connection opened:  {}'.format(str(self.client_id))
 
         self.write_message("you are in game number {}.  Your client_id is {}".format(assigned_game, self.client_id))
-        self.write_message("your fellow clients are {}".format(ConnectionManager.get_connected_clients()))
+        self.write_message("your fellow players are {}".format(GameRunner.get_other_player_ids(self.client_id)))
+        ConnectionManager.send_to_all(GameRunner.get_other_player_ids(self.client_id), "Client {} joined".format(self.client_id))
 
-    def on_message(self, message):
-            print 'message received:  {}'.format(message)
+    def on_message(self, message_json):
+            print 'message received:  {}'.format(message_json)
             # todo:  parse and act
+
+            message = json.loads(message_json)
+            if 'type' not in message or not 'data' in message:
+                # Todo:  come up with some error
+                return
+
+            if message['type'] == 'NICKNAME':
+                name = message['data']['name']
+                previous_name = GameRunner.get_player_name(self.client_id)
+                GameRunner.update_player_name(self.client_id, name)
+                response = messages.NameChangedMessage(self.client_id, name)
+                ConnectionManager.send_to_all(GameRunner.get_players_from_game(self.client_id),
+                                              "{} changed their name to {}".format(previous_name, name))
+                ConnectionManager.send_to_all(GameRunner.get_players_from_game(self.client_id),
+                                              json.dumps(response.get_message()))
+
+            elif message['type'] == "CLAIM_LINE":
+                p1r = message['data']['pt1_r']
+                p1c = message['data']['pt1_c']
+                p2r = message['data']['pt2_r']
+                p2c = message['data']['pt2_c']
+                new_boxes = GameRunner.claim_line(self.client_id, p1r, p1c, p2r, p2c)
+
+                responses = []
+
+                if new_boxes is not None:
+
+                    responses.append(messages.LineClaimedMessage((p1r, p1c), (p2r, p2c), self.client_id))
+
+                    for new_box in new_boxes:
+                        responses.append(messages.BoxCreatedMessage(new_box, self.client_id))
+
+                    for response in responses:
+                        ConnectionManager.send_to_all(GameRunner.get_players_from_game(self.client_id), json.dumps(response.get_message()))
+
+
 
     def on_close(self):
 
-        # TODO:  message everyone who was in the same game as the client.  tell them the client left.
+        other_players = GameRunner.get_other_player_ids(self.client_id)
+        ConnectionManager.send_to_all(other_players, "{} (Client {}) left".format(
+            GameRunner.get_player_name(self.client_id), self.client_id))
 
         ConnectionManager.remove_connection(self.client_id)
         GameRunner.remove_player(self.client_id)
+
+
 
         print 'connection closed...'
 

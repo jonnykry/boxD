@@ -253,14 +253,14 @@ class Board(object):
             # check if the 3 lines necessary for a new box to exist are there
             if (self.__is_valid_edge(tblp, p1) and self.edge_is_owned(tblp, p1)) and \
                     (self.__is_valid_edge(tbrp, p2) and self.edge_is_owned(tbrp, p2))and \
-                    (self.__is_valid_edge(tblp, tbrp and self.edge_is_owned(tblp, tbrp))):
+                    (self.__is_valid_edge(tblp, tbrp) and self.edge_is_owned(tblp, tbrp)):
 
                 new_boxes.append(tblp)
 
             # check if the 3 lines necessary for a new box to exist are there
             if (self.__is_valid_edge(p1, bblp) and self.edge_is_owned(p1, bblp)) and \
                     (self.__is_valid_edge(p2, bbrp) and self.edge_is_owned(p2, bbrp))and \
-                    (self.__is_valid_edge(bblp, bbrp and self.edge_is_owned(bblp, bbrp))):
+                    (self.__is_valid_edge(bblp, bbrp) and self.edge_is_owned(bblp, bbrp)):
 
                 new_boxes.append(p1)
 

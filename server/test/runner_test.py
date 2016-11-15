@@ -68,5 +68,15 @@ class TestBoxdRunner(unittest.TestCase):
         self.assertEqual(GameRunner.get_player_ids(), [])
         self.assertEqual(GameRunner.running_games(), 0)
 
+    def test_updating_player_name(self):
+
+        client_id = "0"
+        GameRunner.assign_player(client_id)
+        self.assertEqual(GameRunner.get_player_name(client_id), "Unnamed Player")
+
+        GameRunner.update_player_name(client_id, "Bernie Sanders")
+        self.assertEqual(GameRunner.get_player_name(client_id), "Bernie Sanders")
+
+
 if __name__ == '__main__':
     unittest.main()
