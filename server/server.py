@@ -1,4 +1,3 @@
-from google.appengine.ext import tor
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
