@@ -3,12 +3,12 @@ $(document).ready( function() {
     var board = Board.init();
 
     // Temporarily testing board/game here, though we should move this to another file ran serparately
-    board.claimEdge({x: 3, y: 2}, {x: 3, y: 3}, 'Blake');
-    board.claimEdge({x: 3, y: 2}, {x: 2, y: 3}, 'Jonny');
-    console.log(board.edges.length);
-    board.removeEdge({x: 3, y: 2}, {x: 3, y: 3});
-    board.removeEdge({x: 3, y: 2}, {x: 3, y: 3});
-    console.log(board.edges.length);
+   // board.claimEdge({x: 3, y: 2}, {x: 3, y: 3}, 'Blake');
+    //board.claimEdge({x: 3, y: 2}, {x: 2, y: 3}, 'Jonny');
+    //console.log(board.edges.length);
+    //board.removeEdge({x: 3, y: 2}, {x: 3, y: 3});
+    //board.removeEdge({x: 3, y: 2}, {x: 3, y: 3});
+    //console.log(board.edges.length);
 
     $('#entryModal').modal({show: true});
 
