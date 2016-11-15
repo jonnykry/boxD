@@ -13,7 +13,8 @@ var Board = {
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
-        this.interval = setInterval(updateBoard, 20);
+        this.interval = setInterval(this.updateBoard, 20);
+        return this;
         },
     stop : function(){
         clearInterval(this.interval);
@@ -51,8 +52,34 @@ var Board = {
     removeEdge: function(src, dst) {
        // this.edges = this.edges.filter(function (edge) {
            // return !(edge.src.x == src.x && edge.src.y == src.y && edge.dst.x == dst.x && edge.dst.y == dst.y);
+        },
+    updateBoard: function(){
+        Board.clear();
+    	Board.cursor.update();
+    	for(var i=0; i< Board.edges.length;i++){
+    		Board.edges[i].update();
         }
-
+        if (Board.curx>(Board.canvas.width-100) && camera.x>-3000) {
+            camera.x-=10
+            Board.moveContext();
+        }
+        else if (Board.curx<(100)&& camera.x<0) {
+            camera.x+=10
+            Board.moveContext();
+        }
+        if (Board.cury>(Board.canvas.height-100) && camera.y>-3000){
+            camera.y-=10
+            Board.moveContext();
+        }
+        else if (Board.cury<(100) && camera.y<0) {
+            camera.y+=10
+            Board.moveContext();
+        }
+    },
+    moveContext: function (){
+        this.context.setTransform(1, 0, 0, 1, 0, 0); // Reset context
+        this.context.translate((camera.x),(camera.y));
+    }
 };
 
 function edge(x,y,x2,y2,color) {
@@ -77,34 +104,6 @@ var camera = {
     width: 1000,
     height: 600
 };
-function moveContext(){
-    Board.context.setTransform(1, 0, 0, 1, 0, 0); // Reset context
-    Board.context.translate((camera.x),(camera.y));
-}
-
-function updateBoard(){
-    Board.clear();
-	Board.cursor.update();
-	for(var i=0; i< Board.edges.length;i++){
-		Board.edges[i].update();
-    }
-    if (Board.curx>(Board.canvas.width-100) && camera.x>-3000) {
-        camera.x-=10
-        moveContext();
-    }
-    else if (Board.curx<(100)&& camera.x<0) {
-        camera.x+=10
-        moveContext();
-    }
-    if (Board.cury>(Board.canvas.height-100) && camera.y>-3000){
-        camera.y-=10
-        moveContext();
-    }
-    else if (Board.cury<(100) && camera.y<0) {
-        camera.y+=10
-        moveContext();
-    }
-}
 
 Board.canvas.addEventListener('mousedown',function(e) {
     mousex= e.pageX;
