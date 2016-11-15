@@ -7,6 +7,9 @@
 
     <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/js/bootstrap.min.js" integrity="sha384-BLiI7JTZm+JWlgKa0M0kGRpJbF2J8q+qreVrKBC47e3K6BW78kGLrCkeRX6I9RoK" crossorigin="anonymous"></script>
+    <script src="js/board.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/app.js"></script>
 </head>
 <body>
   <div class="game">
@@ -48,76 +51,3 @@
   </div>
 </body>
 </html>
-<script>
-
-jQuery(function($){
-    $('#entryModal').modal({show: true});
-
-    if (!("WebSocket" in window)) {
-        alert("Your browser does not support web sockets");
-    } else {
-        setup();
-    }
-
-  function setup(){
-
-    // Note: You have to change the host var
-    // if your client runs on a different machine than the websocket server
-
-    var host = "wss://boxd.herokuapp.com/ws";
-    var socket = new WebSocket(host);
-    //console.log("socket status: " + socket.readyState);
-
-    var $txt = $("#data");
-    var $btnSend = $("#sendtext");
-
-    $txt.focus();
-
-    // event handlers for UI
-    $btnSend.on('click',function(){
-      var text = $txt.val();
-      if(text == ""){
-        return;
-      }
-      socket.send(text);
-      $txt.val("");
-    });
-
-    $txt.keypress(function(evt){
-      if(evt.which == 13){
-        $btnSend.click();
-      }
-    });
-
-    // event handlers for websocket
-    if(socket){
-
-      socket.onopen = function(){
-        //alert("connection opened....");
-      }
-
-      socket.onmessage = function(msg){
-        showServerResponse(msg.data);
-      }
-
-      socket.onclose = function(){
-        //alert("connection closed....");
-        showServerResponse("The connection has been closed.");
-      }
-
-    }else{
-      console.log("invalid socket");
-    }
-
-    function showServerResponse(txt){
-      var p = document.createElement('p');
-      p.innerHTML = txt;
-      document.getElementById('output').appendChild(p);
-    }
-
-
-  }
-
-});
-
-</script>
