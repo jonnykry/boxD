@@ -33,15 +33,23 @@
                   <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                       <span aria-hidden="true">&times;</span>
                   </button>
-                  <h4 class="modal-title" id="entryModalTitle">Modal title</h4>
+                  <h4 class="modal-title" id="entryModalTitle">Welcome to boxD!</h4>
               </div>
               <div class="modal-body">
-                  <div id="send" class="container">
-                      Enter text to send to the websocket server:
-                      <input type="text" id="data" /><br>
-                      <input type="button" id="sendtext" value="Send Text" class="btn btn-secondary"/>
-                      <div id="output"></div>
+                  <div class="form-inline">
+                    <label for="nickname">Enter a Nickname: </label><br>
+                      <div class="form-group">
+                        <input type="text" class="form-control" id="nickname" placeholder="Muhammad Ali">
+                      </div>
+                      <button type="submit" id="startGame" class="btn btn-primary">Enter Game</button>
+                      <br><br><label for="nickname">Test a Message: </label><br>
+                      <div class="form-group">
+                        <input type="text" class="form-control" id="testText" placeholder="Enter Test JSON">
+                      </div>
+                      <button type="submit" id="submit" class="btn btn-primary">Submit</button>
+                      <br>
                   </div>
+                  <div id="output"></div>
               </div>
               <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

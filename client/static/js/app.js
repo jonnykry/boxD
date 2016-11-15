@@ -12,8 +12,8 @@ $(document).ready( function() {
 
     $('#entryModal').modal({show: true});
 
-    if (!("WebSocket" in window)) {
-        alert("Your browser does not support web sockets");
+    if (!('WebSocket' in window)) {
+        alert('Your browser does not support web sockets');
     } else {
         setup();
     }
@@ -23,67 +23,78 @@ $(document).ready( function() {
             url = window.location.href;
         }
 
-        name = name.replace(/[\[\]]/g, "\\$&");
-        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
                 results = regex.exec(url);
         if (!results) return null;
         if (!results[2]) return '';
-        return decodeURIComponent(results[2].replace(/\+/g, " "));
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
     }
 
     function setup(){
-        // Note: You have to change the host var
-        // if your client runs on a different machine than the websocket server
-
         var host;
         if (getParameterByName('local') == 'true') {
-            host = "ws://localhost:5000/ws"
+            host = 'ws://localhost:5000/ws';
         } else {
-            host = "wss://boxd.herokuapp.com/ws";
+            host = 'wss://boxd.herokuapp.com/ws';
         }
 
         var socket = new WebSocket(host);
         //console.log("socket status: " + socket.readyState);
 
-        var $txt = $("#data");
-        var $btnSend = $("#sendtext");
+        var $nickname = $('#nickname');
+        var $startGame = $('#startGame');
 
-        $txt.focus();
+        $nickname.focus();
 
         // event handlers for UI
-        $btnSend.on('click',function(){
-            var text = $txt.val();
-            if(text == ""){
-                return;
-            }
+        $startGame.on('click',function(){
+            var text = $nickname.val();
 
-            socket.send(text);
-            $txt.val("");
+            if (text === null || text === 'undefined') text = '';
+
+            var request = {
+               type:  'JOIN_GAME',
+               data: {
+                    name:  text
+               }
+            };
+
+            socket.send(JSON.stringify(request));
+            $nickname.val('');
         });
 
-        $txt.keypress(function(evt){
-            if(evt.which == 13){
-                $btnSend.click();
+        $nickname.keypress(function(evt) {
+            if (evt.which == 13) { // ENTER
+                $startGame.click();
             }
+        });
+
+        var $testText = $('#testText');
+        var $submit = $('#submit');
+
+        $submit.on('click',function(){
+            var text = $testText.val();
+
+            if (text === null || text === 'undefined') text = '';
+
+            socket.send(text);
+            $testText.val('');
         });
 
         // event handlers for websocket
-        if(socket){
-            socket.onopen = function(){
-                //alert("connection opened....");
-            };
+        if (socket) {
+            socket.onopen = function(){};
 
             socket.onmessage = function(msg){
                 showServerResponse(msg.data);
             };
 
             socket.onclose = function(){
-                //alert("connection closed....");
-                showServerResponse("The connection has been closed.");
+                showServerResponse('The connection has been closed.');
             }
-
         } else {
-            console.log("invalid socket");
+            console.log('invalid socket');
         }
 
         function showServerResponse(txt){
