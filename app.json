@@ -1,0 +1,10 @@
+{
+  "name": "boxD",
+  "description": "boxD is the slither.io & agar.io for dots 'n boxes",
+  "repository": "https://github.com/jonnykry/boxd",
+  "logo": "http://emojipedia-us.s3.amazonaws.com/cache/ca/28/ca28d550c9938f5c2bdc9d285e0efeb6.png",
+  "keywords": ["tornado",
+    "game",
+    "thread"],
+
+}
