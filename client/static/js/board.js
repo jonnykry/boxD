@@ -13,7 +13,7 @@ var Board = {
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
-        this.interval = setInterval(this.updateBoard, 20);
+        this.interval = requestAnimationFrame(this.updateBoard);
         return this;
         },
     stop : function(){
@@ -75,6 +75,7 @@ var Board = {
             camera.y+=10
             Board.moveContext();
         }
+        requestAnimationFrame(Board.updateBoard);
     },
     moveContext: function (){
         this.context.setTransform(1, 0, 0, 1, 0, 0); // Reset context
