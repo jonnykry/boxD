@@ -1,6 +1,11 @@
 import game.boxd_game
 import traceback
 import sys
+from datetime import datetime, timedelta
+
+
+COOLDOWN_SECONDS = 10
+
 
 class GameRunner(object):
 
@@ -51,12 +56,20 @@ class GameRunner(object):
 
         def claim_line(self, player_id, p1_r, p1_c, p2_r, p2_c):
             # TODO:  Error checking
+
+            if player_id not in self.players:
+                raise ValueError("Player wasn't found {}".format(player_id))
+
+            if datetime.now() < self.players[player_id].next_move:
+                raise CooldownError()
+
             players_game = self.player_game_map[player_id]
             pt1 = (p1_r, p1_c)
             pt2 = (p2_r, p2_c)
 
             try:
                 new_boxes = players_game.claim_line(pt1, pt2, player_id)
+                self.players[player_id].next_move = datetime.now() + timedelta(seconds=COOLDOWN_SECONDS)
             except game.boxd_game.EdgeOwnedError:
                 print "Race condition happened"
                 return None
@@ -129,6 +142,13 @@ class GameRunner(object):
 
 class Player(object):
 
-    def __init__(self, player_id):
+    def __init__(self, player_id, next_move=datetime.now()):
         self.player_id = player_id
         self.name = "Unnamed Player"
+        self.next_move = next_move
+
+
+class CooldownError(Exception):
+
+    def __init__(self):
+        pass
