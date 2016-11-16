@@ -20,7 +20,7 @@ var Board = {
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
-        this.interval = setInterval(updateBoard, 1000/60);
+        this.interval = setInterval(updateBoard, 20);
 
         return this;
     },
