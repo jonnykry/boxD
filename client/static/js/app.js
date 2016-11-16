@@ -98,7 +98,7 @@ $(document).ready( function() {
             // TODO: Get Player Result from the server
             return {
                 name: 'TempName',
-                color: 'white'
+                color: 'blue'
             }
         }
 
