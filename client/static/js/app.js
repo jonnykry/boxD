@@ -5,8 +5,7 @@ $(document).ready( function() {
     if (!('WebSocket' in window)) {
         alert('Your browser does not support web sockets');
     } else {
-        playerResult = setup();
-
+        var playerResult = setup();
         var player = Player.init(playerResult.name, playerResult.color);
         var game = Game.init(player);
         var board = game.board;
@@ -66,7 +65,7 @@ $(document).ready( function() {
             var $testText = $('#testText');
             var $submit = $('#submit');
 
-            $submit.on('click',function(){
+            $submit.on('click', function(){
                 var text = $testText.val();
 
                 if (text === null || text === 'undefined') text = '';
@@ -79,23 +78,24 @@ $(document).ready( function() {
             if (socket) {
                 socket.onopen = function(){};
 
-                socket.onmessage = function(msg){
+                socket.onmessage = function(msg) {
                     showServerResponse(msg.data);
                 };
 
-                socket.onclose = function(){
+                socket.onclose = function() {
                     showServerResponse('The connection has been closed.');
                 }
             } else {
                 console.log('invalid socket');
             }
 
-            function showServerResponse(txt){
+            function showServerResponse(txt) {
                 var p = document.createElement('p');
                 p.innerHTML = txt;
                 document.getElementById('output').appendChild(p);
             }
 
+            // TODO: Get Player Result from the server
             return {
                 name: 'TempName',
                 color: 'white'
@@ -114,32 +114,32 @@ $(document).ready( function() {
             var pointy2 = pointy;
 
             //get second point
-            if ((mousex%100)>=(mousey%100) && mousex %100 <50 && mousey%100 <50) {
-                pointx2 = parseInt(pointx)+1;
+            if ((mousex % 100) >= (mousey % 100) && mousex % 100 < 50 && mousey % 100 < 50) {
+                pointx2 = parseInt(pointx) + 1;
             }
-            else if ((mousex%100)<(mousey%100) && mousex%100 <50 && mousey%100 <50){
-                pointy2 = parseInt(pointy)+1;
-            }
-
-            if ((mousex%100)>=(mousey%100) && mousex%100 >=50 && mousey%100 <50){
-                pointx2 = parseInt(pointx)-1;
-            }
-            else if ((mousex%100)<(mousey%100) && mousex%100 >=50 && mousey%100 <50){
-                pointy2 = parseInt(pointy)+1;
+            else if ((mousex % 100) < (mousey % 100) && mousex % 100 <50 && mousey % 100 < 50){
+                pointy2 = parseInt(pointy) + 1;
             }
 
-            if ((mousex%100)>=(mousey%100) && mousex%100 <50 && mousey%100 >=50){
-                pointx2 = parseInt(pointx)-1;
+            if ((mousex % 100) >= (mousey % 100) && mousex % 100 >= 50 && mousey % 100 < 50){
+                pointx2 = parseInt(pointx) - 1;
             }
-            else if ((mousex%100)<(mousey%100) && mousex%100 <50 && mousey%100 >=50) {
-                pointy2 = parseInt(pointy)-1;
+            else if ((mousex % 100) < (mousey % 100) && mousex % 100 >= 50 && mousey % 100 < 50){
+                pointy2 = parseInt(pointy) + 1;
             }
 
-            if ((mousex%100)<(mousey%100) && mousex%100 >=50 && mousey%100 >=50){
-                pointx2 = parseInt(pointx)-1;
+            if ((mousex % 100) >= (mousey % 100) && mousex % 100 <50 && mousey % 100 >= 50){
+                pointx2 = parseInt(pointx) - 1;
             }
-            else if ((mousex%100)>=(mousey%100) && mousex%100 >=50 && mousey%100 >=50) {
-                pointy2 = parseInt(pointy)-1;
+            else if ((mousex % 100) < (mousey % 100) && mousex % 100 < 50 && mousey % 100 >= 50) {
+                pointy2 = parseInt(pointy) - 1;
+            }
+
+            if ((mousex % 100) < (mousey % 100) && mousex % 100 >= 50 && mousey % 100 >= 50){
+                pointx2 = parseInt(pointx) - 1;
+            }
+            else if ((mousex % 100) >= (mousey % 100) && mousex % 100 >= 50 && mousey % 100 >= 50) {
+                pointy2 = parseInt(pointy) - 1;
             }
 
             board.claimEdge(pointx, pointy, pointx2, pointy2, player.color);
@@ -151,40 +151,40 @@ $(document).ready( function() {
             board.curx = mousex;
             board.cury = mousey;
 
-            mousex-= board.camera.x;
-            mousey-= board.camera.y;
+            mousex -= board.camera.x;
+            mousey -= board.camera.y;
             var pointx = Math.round(mousex/100);
             var pointy = Math.round(mousey/100);
             var pointx2 = pointx;
             var pointy2 = pointy;
 
             //get second point
-            if ((mousex%100)>=(mousey%100) && mousex%100 <50 && mousey%100 <50) {
-                pointx2 = parseInt(pointx)+1;
+            if ((mousex % 100) >= (mousey % 100) && mousex % 100 < 50 && mousey % 100 < 50) {
+                pointx2 = parseInt(pointx) + 1;
             }
-            else if ((mousex%100)<(mousey%100) && mousex%100 <50 && mousey%100 <50){
-                pointy2 = parseInt(pointy)+1;
-            }
-
-            if ((mousex%100)>=(mousey%100) && mousex%100 >=50 && mousey%100 <50){
-                pointx2 = parseInt(pointx)-1;
-            }
-            else if ((mousex%100)<(mousey%100) && mousex%100 >=50 && mousey%100 <50){
-                pointy2 = parseInt(pointy)+1;
+            else if ((mousex % 100) < (mousey % 100) && mousex % 100 < 50 && mousey % 100 < 50) {
+                pointy2 = parseInt(pointy) + 1;
             }
 
-            if ((mousex%100)>=(mousey%100) && mousex%100 <50 && mousey%100 >=50){
-                pointx2 = parseInt(pointx)-1;
+            if ((mousex % 100) >= (mousey % 100) && mousex % 100 >= 50 && mousey % 100 < 50) {
+                pointx2 = parseInt(pointx) - 1;
             }
-            else if ((mousex%100)<(mousey%100) && mousex%100 <50 && mousey%100 >=50) {
-                pointy2 = parseInt(pointy)-1;
+            else if ((mousex % 100) < (mousey % 100) && mousex % 100 >= 50 && mousey % 100 <50) {
+                pointy2 = parseInt(pointy) + 1;
             }
 
-            if ((mousex%100)<(mousey%100) && mousex%100 >=50 && mousey%100 >=50){
-                pointx2 = parseInt(pointx)-1;
+            if ((mousex % 100) >= (mousey % 100) && mousex%100 < 50 && mousey % 100 >= 50) {
+                pointx2 = parseInt(pointx) - 1;
             }
-            else if ((mousex%100)>=(mousey%100) && mousex%100 >=50 && mousey%100 >=50) {
-                pointy2 = parseInt(pointy)-1;
+            else if ((mousex % 100) < (mousey % 100) && mousex % 100 <50 && mousey % 100 >= 50) {
+                pointy2 = parseInt(pointy) - 1;
+            }
+
+            if ((mousex % 100) < (mousey % 100) && mousex % 100 >= 50 && mousey % 100 >= 50) {
+                pointx2 = parseInt(pointx) - 1;
+            }
+            else if ((mousex % 100) >= (mousey % 100) && mousex % 100 >= 50 && mousey % 100 >= 50) {
+                pointy2 = parseInt(pointy) - 1;
             }
 
             board.setCursor(pointx, pointy, pointx2, pointy2, player.color)

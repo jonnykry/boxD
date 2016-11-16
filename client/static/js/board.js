@@ -6,7 +6,9 @@ var Board = {
     maxCols: 100,
     curx : 200,
     cury : 200,
-    cursor: new Edge(0,0,0,0,'yellow'),
+    lastFrameTimeMs : 0,
+    maxFPS : 60,
+    cursor: new Edge(0, 0, 0, 0, 'yellow'),
     camera: {
         x: 0,
         y: 0,
@@ -20,7 +22,7 @@ var Board = {
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
-        this.interval = setInterval(updateBoard, 20);
+        this.interval = requestAnimationFrame(updateBoard);
 
         return this;
     },
@@ -34,25 +36,25 @@ var Board = {
         this.context.fillStyle = '#525252';
         this.context.fillRect(-this.camera.x, -this.camera.y, this.canvas.width, this.canvas.height);
 
-        for(var i=0; i<this.maxRows; i++){
+        for (var i = 0; i < this.maxRows; i++) {
             this.context.strokeStyle= '#b2b2b2';
-            this.context.moveTo(i*100+100,0);
-            this.context.lineTo(i*100+100,this.maxRows *100);
+            this.context.moveTo(i * 100 + 100, 0);
+            this.context.lineTo(i * 100 + 100, this.maxRows * 100);
             this.context.stroke();
-            this.context.moveTo(0,i*100+100);
-            this.context.lineTo(this.maxRows *100,i*100+100);
+            this.context.moveTo(0, i * 100 + 100);
+            this.context.lineTo(this.maxRows * 100, i * 100 + 100);
             this.context.stroke();
         }
 
-        for(var c=0; c<this.maxCols;c++){
-            for(var r=0; r<this.maxRows;r++){
+        for (var c = 0; c < this.maxCols; c++) {
+            for (var r = 0; r < this.maxRows; r++) {
                 this.context.strokeStyle= 'black';
                 this.context.beginPath();
-                this.context.arc(r*100+100,c*100+100,10,0,2*Math.PI);
+                this.context.arc(r*100+100, c*100+100, 10, 0, 2*Math.PI);
                 this.context.stroke();
             }
         }
-     },
+    },
 
     setCursor: function(x1, y1, x2, y2, color) {
         this.cursor = new Edge(x1, y1, x2, y2, color);
@@ -71,29 +73,37 @@ var Board = {
     }
 };
 
-function updateBoard() {
+function updateBoard(timestamp) {
+    if (timestamp < Board.lastFrameTimeMs + (1000 / Board.maxFPS)) {
+            requestAnimationFrame(updateBoard);
+            return;
+    }
+
+    Board.lastFrameTimeMs = timestamp;
     Board.clear();
     Board.cursor.update();
 
-    for(var i=0; i< Board.edges.length;i++){
+    for(var i = 0; i < Board.edges.length; i++){
         Board.edges[i].update();
     }
 
-    if (Board.curx>(Board.canvas.width-100) && Board.camera.x>-3000) {
-        Board.camera.x-=10;
+    if (Board.curx > (Board.canvas.width - 100) && Board.camera.x > -3000) {
+        Board.camera.x -= 10;
         Board.moveContext();
-    } else if (Board.curx<(100) && Board.camera.x<0) {
-        Board.camera.x+=10;
+    } else if (Board.curx < (100) && Board.camera.x < 0) {
+        Board.camera.x += 10;
         Board.moveContext();
     }
 
-    if (Board.cury>(Board.canvas.height-100) && Board.camera.y>-3000){
-        Board.camera.y-=10;
+    if (Board.cury>(Board.canvas.height - 100) && Board.camera.y > -3000){
+        Board.camera.y -= 10;
         Board.moveContext();
-    } else if (Board.cury<(100) && Board.camera.y<0) {
-        Board.camera.y+=10;
+    } else if (Board.cury < (100) && Board.camera.y < 0) {
+        Board.camera.y += 10;
         Board.moveContext();
     }
+
+    requestAnimationFrame(updateBoard);
 }
 
 function Edge(x, y, x2, y2, color) {
@@ -107,7 +117,7 @@ function Edge(x, y, x2, y2, color) {
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.fillStyle = this.color;
-        ctx.fillRect(this.x*100 -4, this.y*100-4, (this.x2-this.x)*100+4, (this.y2-this.y)*100+4);
+        ctx.fillRect(this.x * 100 - 4, this.y * 100 - 4, (this.x2 - this.x) * 100+4, (this.y2 - this.y) * 100 + 4);
         ctx.restore();
     }
 }
