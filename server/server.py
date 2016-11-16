@@ -29,4 +29,3 @@ if __name__ == "__main__":
     boxd_api.ConnectionManager.create()
     boxd_runner.GameRunner.create()
     tornado.ioloop.IOLoop.instance().start()
-
