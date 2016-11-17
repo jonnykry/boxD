@@ -8,6 +8,9 @@ var Board = {
     cury : 200,
     lastFrameTimeMs : 0,
     maxFPS : 60,
+    move_timer: 0,
+    next_move: 10,
+    cooloff_timer: 0,
     cursor: new Edge(0,0,0,0,'yellow'),
     camera: {
         x: 0,
@@ -73,6 +76,49 @@ var Board = {
         // TODO: Proper edge claiming
         // If valid, render and edge and notify server via websockets
         this.edges.push(new Edge(x1, y1, x2, y2, color));
+    },
+    next_move_timer: function(current) {
+        ctx = this.context;
+        ctx.beginPath();
+        ctx.save();
+        if (this.move_timer < 0.8){
+            ctx.strokeStyle = '#99CC33';
+        }
+        else {
+            ctx.strokeStyle = '#ff0000';
+        }
+        ctx.lineCap = 'square';
+        ctx.lineWidth = 10.0;
+        ctx.arc(120 -this.camera.x, 120-this.camera.y, 70, -(Math.PI / 2), (( Math.PI * 2)) - Math.PI / 2, false);
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.beginPath();
+        ctx.save();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineCap = 'square';
+        ctx.lineWidth = 10.0;
+        ctx.arc(120 -this.camera.x, 120-this.camera.y, 70, -(Math.PI / 2), (( Math.PI * 2) * current) - Math.PI / 2, false);
+        ctx.stroke();
+        ctx.restore();
+    },
+    cool_off_timer: function(current) {
+        ctx = this.context;
+        ctx.beginPath();
+        ctx.save();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 75.0;
+        ctx.arc(120 -this.camera.x, 120-this.camera.y, 35, -(Math.PI / 2), (( Math.PI * 2)) - Math.PI / 2, false);
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.beginPath();
+        ctx.save();
+        ctx.strokeStyle = '#0066ff';
+        ctx.lineWidth = 75.0;
+        ctx.arc(120 -this.camera.x, 120-this.camera.y, 35, -(Math.PI / 2), (( Math.PI * 2) * current) - Math.PI / 2, false);
+        ctx.stroke();
+        ctx.restore();
     }
 };
 
@@ -105,7 +151,16 @@ function updateBoard(timestamp) {
         Board.camera.y+=10;
         Board.moveContext();
     }
+    Board.cool_off_timer(Board.cooloff_timer);
+    Board.next_move_timer(Board.move_timer);
+    Board.cooloff_timer+=0.0033;
+    if( Board.cooloff_timer >=1){
+    Board.move_timer+=0.0016;
+       if (Board.move_timer >=1){
+       Board.move_timer =0;
+       }
 
+    }
 
     requestAnimationFrame(updateBoard);
 }
