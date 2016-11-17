@@ -7,9 +7,14 @@ script:
 - echo "NoScriptKip"
 branches:
   only:
+  - jonny-dev
   - gtharris-dev
+  - sam_dev
+  - blake-dev
+  - master
 deploy:
   provider: heroku
   app: boxd
   api_key:
     secure: jylO17ojnUlNQgInFbD2iHe/Md07KSl9MhQapaHRuWFrWCMrxoz/xLrq3nyCOorai5PZ40/pQXoM71iFp3NipErAJhDI5Diue5tuv6pi3oBJ9DuOID5wGX8mmD7s7yLBfKd80MUmzIQXnTXzaE2E00mumLpRrOf2IGRoxZtoY3wvnlLXaZ3d95YjqPBkHjncRpPuGd7rbqC3/W82VpcQYmwIz8X4eWKD8SHjLEK7ImeHX7bdM0gWMsJWPbRPZjGo6Ii82QlVZqO4VkC015fAO+dIKerzbeDN0bTj/cNso+ZTrRVRzO3SJDW+vk5jrdSsJ+2XQtuz5wEdur6LB17wNql43x/pn5LOaJlPfQQUaORfWUmQJogXjMNEH4RKARe+/nPBRGwZiJY549I/2g8GcrH3EsRf7NvHKqBgjeV8CB0u7K3mrCOsixsLY8WecxKVsgniCORQlDZb4fyrFPqGzF4rQjfVoiOZe2FSsJdyE8lXH0XDGLpPw+qXdOp1IjFPUO/BWhRrSm8CKK9hDYIiYnI50Tvtta5jRLvqNCYaJY5W37NyXUe+n5CK74kQgg+rWCnl8kitNVGq6PlXHU11woxlQPTnqE1rsD0E2KfUezal2aVp9qHz7tC219FaLOZjCG6BlsFBsJEfZah5qZr9x/mKY6SGGtveCn1l2Y4tGzk=
+  on: master
