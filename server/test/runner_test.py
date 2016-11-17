@@ -72,7 +72,7 @@ class TestBoxdRunner(unittest.TestCase):
 
         client_id = "0"
         GameRunner.assign_player(client_id)
-        self.assertEqual(GameRunner.get_player_name(client_id), "Unnamed Player")
+        self.assertEqual(GameRunner.get_player_name(client_id), "Muhammad Ali0")
 
         GameRunner.update_player_name(client_id, "Bernie Sanders")
         self.assertEqual(GameRunner.get_player_name(client_id), "Bernie Sanders")
