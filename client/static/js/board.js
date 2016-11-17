@@ -4,8 +4,8 @@ var Board = {
     canvas : document.createElement("canvas"),
     maxRows: 100,
     maxCols: 100,
-    curx : 200,
-    cury : 200,
+    curX : 200,
+    curY : 200,
     lastFrameTimeMs : 0,
     maxFPS : 60,
     cursor: new Edge(0, 0, 0, 0, 'yellow'),
@@ -50,7 +50,7 @@ var Board = {
             for (var r = 0; r < this.maxRows; r++) {
                 this.context.strokeStyle= 'black';
                 this.context.beginPath();
-                this.context.arc(r*100+100, c*100+100, 10, 0, 2*Math.PI);
+                this.context.arc(r * 100 + 100, c * 100 + 100, 10, 0, 2 * Math.PI);
                 this.context.stroke();
             }
         }
@@ -60,7 +60,7 @@ var Board = {
         this.cursor = new Edge(x1, y1, x2, y2, color);
     },
 
-    moveContext: function (){
+    moveContext: function () {
         this.context.setTransform(1, 0, 0, 1, 0, 0); // Reset context
         this.context.translate((this.camera.x),(this.camera.y));
     },
@@ -70,7 +70,51 @@ var Board = {
         // TODO: Proper edge claiming
         // If valid, render and edge and notify server via websockets
         this.edges.push(new Edge(x1, y1, x2, y2, color));
-    }
+    },
+
+    getPointsByCursor: function(mouseX, mouseY) {
+            var result = {};
+
+            // Get closest point
+            var pointX = Math.round(mouseX / 100);
+            var pointY = Math.round(mouseY / 100);
+
+            result.pointX = pointX;
+            result.pointY = pointY;
+            result.pointX2 = pointX;
+            result.pointY2 = pointY;
+
+            //get second point
+            if ((mouseX % 100) >= (mouseY % 100) && mouseX % 100 < 50 && mouseY % 100 < 50) {
+                result.pointX2 = parseInt(pointX) + 1;
+            }
+            else if ((mouseX % 100) < (mouseY % 100) && mouseX % 100 < 50 && mouseY % 100 < 50) {
+                result.pointY2 = parseInt(pointY) + 1;
+            }
+
+            if ((mouseX % 100) >= (mouseY % 100) && mouseX % 100 >= 50 && mouseY % 100 < 50) {
+                result.pointX2 = parseInt(pointX) - 1;
+            }
+            else if ((mouseX % 100) < (mouseY % 100) && mouseX % 100 >= 50 && mouseY % 100 <50) {
+                result.pointY2 = parseInt(pointY) + 1;
+            }
+
+            if ((mouseX % 100) >= (mouseY % 100) && mouseX % 100 < 50 && mouseY % 100 >= 50) {
+                result.pointX2 = parseInt(pointX) - 1;
+            }
+            else if ((mouseX % 100) < (mouseY % 100) && mouseX % 100 <50 && mouseY % 100 >= 50) {
+                result.pointY2 = parseInt(pointY) - 1;
+            }
+
+            if ((mouseX % 100) < (mouseY % 100) && mouseX % 100 >= 50 && mouseY % 100 >= 50) {
+                result.pointX2 = parseInt(pointX) - 1;
+            }
+            else if ((mouseX % 100) >= (mouseY % 100) && mouseX % 100 >= 50 && mouseY % 100 >= 50) {
+                result.pointY2 = parseInt(pointY) - 1;
+            }
+
+            return result;
+        }
 };
 
 function updateBoard(timestamp) {
@@ -83,22 +127,22 @@ function updateBoard(timestamp) {
     Board.clear();
     Board.cursor.update();
 
-    for(var i = 0; i < Board.edges.length; i++){
+    for (var i = 0; i < Board.edges.length; i++) {
         Board.edges[i].update();
     }
 
-    if (Board.curx > (Board.canvas.width - 100) && Board.camera.x > -3000) {
+    if (Board.curX > (Board.canvas.width - 100) && Board.camera.x > -3000) {
         Board.camera.x -= 10;
         Board.moveContext();
-    } else if (Board.curx < (100) && Board.camera.x < 0) {
+    } else if (Board.curX < (100) && Board.camera.x < 0) {
         Board.camera.x += 10;
         Board.moveContext();
     }
 
-    if (Board.cury>(Board.canvas.height - 100) && Board.camera.y > -3000){
+    if (Board.curY>(Board.canvas.height - 100) && Board.camera.y > -3000){
         Board.camera.y -= 10;
         Board.moveContext();
-    } else if (Board.cury < (100) && Board.camera.y < 0) {
+    } else if (Board.curY < (100) && Board.camera.y < 0) {
         Board.camera.y += 10;
         Board.moveContext();
     }
