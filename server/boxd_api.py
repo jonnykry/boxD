@@ -1,6 +1,6 @@
 import tornado.websocket
 import json
-from boxd_runner import GameRunner
+from boxd_runner import GameRunner, CooldownError
 from models import message as messages
 
 
@@ -105,12 +105,8 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
         ConnectionManager.register_connection(self.client_id, self)
 
         # assign client to a game
-        assigned_game = GameRunner.assign_player(self.client_id)
         print 'connection opened:  {}'.format(str(self.client_id))
-
-        self.write_message("you are in game number {}.  Your client_id is {}".format(assigned_game, self.client_id))
-        self.write_message("your fellow players are {}".format(GameRunner.get_other_player_ids(self.client_id)))
-        ConnectionManager.send_to_all(GameRunner.get_other_player_ids(self.client_id), "Client {} joined".format(self.client_id))
+        self.write_message("Your client_id is {}".format(self.client_id))
 
     def on_message(self, message_json):
             print 'message received:  {}'.format(message_json)
@@ -121,7 +117,20 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
                 # Todo:  come up with some error
                 return
 
-            if message['type'] == 'NICKNAME':
+            if message['type'] == 'JOIN_GAME':
+                name = message['data']['name']
+                assigned_game = GameRunner.assign_player(self.client_id)
+                GameRunner.update_player_name(self.client_id, name)
+
+                ConnectionManager.send_message(self.client_id, "You joined game {} as {}".format(assigned_game, name))
+                ConnectionManager.send_message(self.client_id, "The game has the following players:  {}"
+                                               .format(GameRunner().get_other_player_ids(self.client_id)))  # TODO:  Send player scores and board state
+                ConnectionManager.send_to_all(GameRunner.get_other_player_ids(self.client_id),
+                                              "{} (client {}) joined the game".format(name, self.client_id))
+
+            # TODO:  elif message['type'] == 'LEAVE_GAME':
+
+            elif message['type'] == 'NICKNAME':
                 name = message['data']['name']
                 previous_name = GameRunner.get_player_name(self.client_id)
                 GameRunner.update_player_name(self.client_id, name)
@@ -136,20 +145,25 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
                 p1c = message['data']['pt1_c']
                 p2r = message['data']['pt2_r']
                 p2c = message['data']['pt2_c']
-                new_boxes = GameRunner.claim_line(self.client_id, p1r, p1c, p2r, p2c)
 
                 responses = []
+                new_boxes = None
+
+                try:
+                    new_boxes = GameRunner.claim_line(self.client_id, p1r, p1c, p2r, p2c)
+                except CooldownError:
+                    responses.append(messages.Message({"You're still cooling off...": True}))
 
                 # TODO:  Have errors propagate to this method instead of returning None
-                if new_boxes is not None:  # None means an Error occurred. [] means there are no new boxes
+                if new_boxes is not None:  # None means an Race Condition Error occurred. [] means there are no new boxes
 
                     responses.append(messages.LineClaimedMessage((p1r, p1c), (p2r, p2c), self.client_id))
 
                     for new_box in new_boxes:
                         responses.append(messages.BoxCreatedMessage(new_box, self.client_id))
 
-                    for response in responses:
-                        ConnectionManager.send_to_all(GameRunner.get_players_from_game(self.client_id), json.dumps(response.get_message()))
+                for response in responses:
+                    ConnectionManager.send_to_all(GameRunner.get_players_from_game(self.client_id), json.dumps(response.get_message()))
 
     def on_close(self):
 

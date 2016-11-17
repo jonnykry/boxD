@@ -38,10 +38,6 @@ class BoxdGame(object):
 
         try:
             return self.__board.claim_edge(pt1, pt2, player_id)
-        except EdgeOwnedError:
-            # this presumably means another client snagged the line first
-            # do we need to tell the client to redraw a line, or just rely on the other client's successful claim msg?
-            return None
 
         except ValueError:
             # line was somehow invalid

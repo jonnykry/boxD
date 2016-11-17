@@ -1,19 +1,12 @@
 
-// TODO:  Generate a color map for N users, or create a static map
 var Game = {
     board: null,
-    users: null,
-    maxUsers: 8,
+    player: null,
 
-    init: function(maxUsers) {
-        maxUsers = maxUsers || 8;
+    init: function(player) {
         this.board = Board.init();
-        users = [];
+        this.player = player;
 
         return this;
-    },
-
-    addUser: function(name) {
-        users.push({name: name, color: 0, score: 0, });
     }
 };
