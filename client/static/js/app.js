@@ -1,37 +1,71 @@
 
 $(document).ready( function() {
-    var board = Board.init();
-
-    // Temporarily testing board/game here, though we should move this to another file ran serparately
-   // board.claimEdge({x: 3, y: 2}, {x: 3, y: 3}, 'Blake');
-    //board.claimEdge({x: 3, y: 2}, {x: 2, y: 3}, 'Jonny');
-    //console.log(board.edges.length);
-    //board.removeEdge({x: 3, y: 2}, {x: 3, y: 3});
-    //board.removeEdge({x: 3, y: 2}, {x: 3, y: 3});
-    //console.log(board.edges.length);
-
     $('#entryModal').modal({show: true});
 
     if (!('WebSocket' in window)) {
         alert('Your browser does not support web sockets');
     } else {
-        setup();
+        var socket = setup();
+        // TODO: Generate player based on `JOIN_GAME` response
+        var player = Player.init("Jonny", "blue");
+        var game = Game.init(player);
+        var board = game.board;
+
+        board.canvas.addEventListener('mousedown', function(e) {
+            var mouseX = e.pageX;
+            var mouseY = e.pageY;
+            mouseX -= board.camera.x;
+            mouseY -= board.camera.y;
+
+            var points = board.getPointsByCursor(mouseX, mouseY);
+
+            console.log(points.pointX, points.pointY, points.pointX2, points.pointY2);
+
+            // TODO:  If the edge is valid, let's do it
+            // Note:  Pass as (y, x) since backend uses (r, c)
+            var request = {
+               type:  'CLAIM_LINE',
+               data: {
+                   pt1_r: points.pointY,
+                   pt1_c: points.pointX,
+                   pt2_r: points.pointY2,
+                   pt2_c: points.pointX2
+               }
+            };
+
+            socket.send(JSON.stringify(request));
+
+            board.claimEdge(points.pointX, points.pointY, points.pointX2, points.pointY2, player.color);
+        });
+
+        board.canvas.addEventListener('mousemove', function(e) {
+            var mouseX = e.pageX;
+            var mouseY = e.pageY;
+            board.curX = mouseX;
+            board.curY = mouseY;
+            mouseX -= board.camera.x;
+            mouseY -= board.camera.y;
+
+            var points = board.getPointsByCursor(mouseX, mouseY);
+
+            board.setCursor(points.pointX, points.pointY, points.pointX2, points.pointY2, player.color)
+        });
     }
 
-    function getParameterByName(name, url) {
-        if (!url) {
-            url = window.location.href;
+        function getParameterByName(name, url) {
+            if (!url) {
+                url = window.location.href;
+            }
+
+            name = name.replace(/[\[\]]/g, '\\$&');
+            var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+                    results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, ' '));
         }
 
-        name = name.replace(/[\[\]]/g, '\\$&');
-        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-                results = regex.exec(url);
-        if (!results) return null;
-        if (!results[2]) return '';
-        return decodeURIComponent(results[2].replace(/\+/g, ' '));
-    }
-
-    function setup(){
+    function setup() {
         var host;
         if (getParameterByName('local') == 'true') {
             host = 'ws://localhost:5000/ws';
@@ -39,7 +73,7 @@ $(document).ready( function() {
             host = 'wss://boxd.herokuapp.com/ws';
         }
 
-        var socket = new WebSocket(host);
+        var _socket = new WebSocket(host);
         //console.log("socket status: " + socket.readyState);
 
         var $nickname = $('#nickname');
@@ -48,23 +82,23 @@ $(document).ready( function() {
         $nickname.focus();
 
         // event handlers for UI
-        $startGame.on('click',function(){
+        $startGame.on('click', function () {
             var text = $nickname.val();
 
             if (text === null || text === 'undefined') text = '';
 
             var request = {
-               type:  'JOIN_GAME',
-               data: {
-                    name:  text
-               }
+                type: 'JOIN_GAME',
+                data: {
+                    name: text
+                }
             };
 
-            socket.send(JSON.stringify(request));
+            _socket.send(JSON.stringify(request));
             $nickname.val('');
         });
 
-        $nickname.keypress(function(evt) {
+        $nickname.keypress(function (evt) {
             if (evt.which == 13) { // ENTER
                 $startGame.click();
             }
@@ -73,34 +107,45 @@ $(document).ready( function() {
         var $testText = $('#testText');
         var $submit = $('#submit');
 
-        $submit.on('click',function(){
+        $submit.on('click', function () {
             var text = $testText.val();
 
             if (text === null || text === 'undefined') text = '';
 
-            socket.send(text);
+            _socket.send(text);
             $testText.val('');
         });
 
         // event handlers for websocket
-        if (socket) {
-            socket.onopen = function(){};
-
-            socket.onmessage = function(msg){
-                showServerResponse(msg.data);
+        if (_socket) {
+            _socket.onopen = function () {
+                // TODO: Let the client be idle and view ongoing game behind modal
             };
 
-            socket.onclose = function(){
+            _socket.onmessage = function (msg) {
+                // TODO: Set listeners and call subsequent functions
+                if (msg === 'line_claimed') {
+                    console.log('A line was successfully claimed on the server.');
+                    console.log(msg.data);
+                    // TODO: call board.claimEdge(data);
+                } else {
+                    showServerResponse(msg.data);
+                }
+            };
+
+            _socket.onclose = function () {
                 showServerResponse('The connection has been closed.');
             }
         } else {
             console.log('invalid socket');
         }
 
-        function showServerResponse(txt){
+        function showServerResponse(txt) {
             var p = document.createElement('p');
             p.innerHTML = txt;
             document.getElementById('output').appendChild(p);
         }
+
+        return _socket;
     }
 });
