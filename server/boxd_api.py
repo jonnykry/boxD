@@ -41,6 +41,7 @@ class ConnectionManager(object):
             self.connections[client_id].write_message(message)
 
         def send_to_all(self, client_ids, message):
+            print "Sending to all:  {}".format(message)
             for client_id in client_ids:
                 self.send_message(client_id, message)
 
