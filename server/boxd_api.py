@@ -171,15 +171,15 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
                     ConnectionManager.send_to_all(GameRunner.get_players_from_game(self.client_id), json.dumps(response.get_message()))
 
     def on_close(self):
+        print 'connection closed due to:  {}'.format(self.close_reason)
 
         try:
             other_players = GameRunner.get_other_player_ids(self.client_id)
             ConnectionManager.send_to_all(other_players, "{} (Client {}) left".format(
                 GameRunner.get_player_name(self.client_id), self.client_id))
+            GameRunner.remove_player(self.client_id)
 
-            ConnectionManager.remove_connection(self.client_id)
-        except KeyError: # should only happen if the player is not in a game
+        except ValueError: # should only happen if the player is not in a game
             pass
 
-        GameRunner.remove_player(self.client_id)
-        print 'connection closed due to:  {}'.format(self.close_reason)
+        ConnectionManager.remove_connection(self.client_id)
