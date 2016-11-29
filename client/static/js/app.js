@@ -34,8 +34,18 @@ $(document).ready( function() {
             };
 
             //if it passes update cooloff timer
-            board.move_timer=0;
-            board.cooloff_timer=0;
+            var d = new Date();
+            var s = d.getSeconds();
+            console.log(s);
+            var carryover = 0;
+            if (s>=55){
+                carryover = s - 60;
+            }
+
+            board.move_timer=s+5 + carryover;
+            board.cooloff_timer=s;
+            board.next_move=s+15 + carryover;
+            board.cooloff_end=s+5 + carryover;
             socket.send(JSON.stringify(request));
 
             board.claimEdge(points.pointX, points.pointY, points.pointX2, points.pointY2, player.color);
@@ -127,6 +137,7 @@ $(document).ready( function() {
 
             _socket.onmessage = function (msg) {
                 // TODO: Set listeners and call subsequent functions
+                console.log(msg);
                 if (msg === 'line_claimed') {
                     console.log('A line was successfully claimed on the server.');
                     console.log(msg.data);
@@ -137,6 +148,7 @@ $(document).ready( function() {
             };
 
             _socket.onclose = function () {
+                console.log("Closed");
                 showServerResponse('The connection has been closed.');
             }
         } else {
