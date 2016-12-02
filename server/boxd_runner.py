@@ -4,7 +4,7 @@ import sys
 from datetime import datetime, timedelta
 
 
-COOLDOWN_SECONDS = 10
+COOLDOWN_SECONDS = 0
 
 
 class GameRunner(object):
