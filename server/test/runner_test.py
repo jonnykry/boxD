@@ -3,12 +3,12 @@ import unittest
 from server.boxd_runner import GameRunner
 
 
-class TestBoxdRunner(unittest.TestCase):
+class BoxdRunnerTest(unittest.TestCase):
 
     def setUp(self):
         GameRunner.reset()
 
-    def test_get_remove_player(self):
+    def testGetRemovePlayer(self):
         GameRunner.assign_player("0")
         GameRunner.assign_player("1")
         GameRunner.assign_player("2")

@@ -1,5 +1,7 @@
 import tornado.websocket
 import json
+import time
+from threading import Thread
 from boxd_runner import GameRunner, CooldownError
 from models import message as messages
 
@@ -21,6 +23,13 @@ class ConnectionManager(object):
 
         def __init__(self):
             self.connections = {}
+            t = Thread(target=self.poke_all_connections)
+            t.start()
+
+        def poke_all_connections(self):
+            while True:
+                time.sleep(45)
+                self.send_to_all(self.connections.values(), json.dumps({"stay_with_me": True}))
 
         def connected_clients(self):
             return len(self.connections)
@@ -57,7 +66,7 @@ class ConnectionManager(object):
 
         def remove_connection(self, client_id):
 
-            if not client_id in self.connections:
+            if client_id not in self.connections:
                 raise ValueError("Client id was not registered:  {}".format(client_id))
 
             self.connections.pop(client_id)
@@ -101,7 +110,6 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
         return True
 
     def open(self):
-
         # register connection
         ConnectionManager.register_connection(self.client_id, self)
 
@@ -160,7 +168,8 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
                     responses.append(messages.Message({"You're still cooling off...": True}))
 
                 # TODO:  Have errors propagate to this method instead of returning None
-                if new_boxes is not None:  # None means an Race Condition Error occurred. [] means there are no new boxes
+                # None means an Race Condition Error occurred. [] means there are no new boxes
+                if new_boxes is not None:
 
                     responses.append(messages.LineClaimedMessage((p1r, p1c), (p2r, p2c), self.client_id))
 
@@ -179,7 +188,7 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
                 GameRunner.get_player_name(self.client_id), self.client_id))
             GameRunner.remove_player(self.client_id)
 
-        except ValueError: # should only happen if the player is not in a game
+        except ValueError:  # should only happen if the player is not in a game
             pass
 
         ConnectionManager.remove_connection(self.client_id)
