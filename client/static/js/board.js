@@ -45,10 +45,10 @@ var Board = {
 
         for (var i = 0; i < this.maxRows; i++) {
             this.context.strokeStyle= '#b2b2b2';
-            this.context.moveTo(i * scale + scale, 0);
+            this.context.moveTo(i * scale + scale, scale);
             this.context.lineTo(i * scale + scale, this.maxRows * scale);
             this.context.stroke();
-            this.context.moveTo(0, i * scale + scale);
+            this.context.moveTo(scale, i * scale + scale);
             this.context.lineTo(this.maxRows * scale, i * scale + scale);
             this.context.stroke();
         }

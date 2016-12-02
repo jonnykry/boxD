@@ -1,4 +1,3 @@
-
 $(document).ready( function() {
     $('#entryModal').modal({show: true});
 
@@ -17,22 +16,24 @@ $(document).ready( function() {
             mouseX -= board.camera.x;
             mouseY -= board.camera.y;
 
-            var points = board.getPointsByCursor(mouseX, mouseY);
+            if(mouseX > scale && mouseY > scale && mouseX < board.maxCols * scale && mouseY < board.maxCols * scale ){
 
-            console.log(points.pointX, points.pointY, points.pointX2, points.pointY2);
+                var points = board.getPointsByCursor(mouseX, mouseY);
 
-            // TODO:  If the edge is valid, let's do it
-            // Note:  Pass as (y, x) since backend uses (r, c)
-            var request = {
-               type:  'CLAIM_LINE',
-               data: {
-                   pt1_r: points.pointY,
-                   pt1_c: points.pointX,
-                   pt2_r: points.pointY2,
-                   pt2_c: points.pointX2
-               }
-            };
+                console.log(points.pointX, points.pointY, points.pointX2, points.pointY2);
 
+                // TODO:  If the edge is valid, let's do it
+                // Note:  Pass as (y, x) since backend uses (r, c)
+                var request = {
+                   type:  'CLAIM_LINE',
+                   data: {
+                       pt1_r: points.pointY,
+                       pt1_c: points.pointX,
+                       pt2_r: points.pointY2,
+                       pt2_c: points.pointX2
+                   }
+                };
+            }
             //if it passes update cooloff timer
             var d = new Date();
             var s = d.getSeconds();
@@ -59,9 +60,12 @@ $(document).ready( function() {
             mouseX -= board.camera.x;
             mouseY -= board.camera.y;
 
-            var points = board.getPointsByCursor(mouseX, mouseY);
+            if(mouseX > 100 && mouseY > 100 && mouseX < board.maxCols * scale && mouseY < board.maxCols * scale){
+                var points = board.getPointsByCursor(mouseX, mouseY);
 
-            board.setCursor(points.pointX, points.pointY, points.pointX2, points.pointY2, player.color)
+                board.setCursor(points.pointX, points.pointY, points.pointX2, points.pointY2, player.color);
+
+            }
         });
     }
 
