@@ -29,7 +29,7 @@ class ConnectionManager(object):
         def poke_all_connections(self):
             while True:
                 time.sleep(45)
-                self.send_to_all(self.connections.values(), json.dumps({"stay_with_me": True}))
+                self.send_to_all(self.connections.keys(), json.dumps({"stay_with_me": True}))
 
         def connected_clients(self):
             return len(self.connections)
@@ -42,7 +42,7 @@ class ConnectionManager(object):
         def send_message(self, client_id, message):
 
             if client_id not in self.connections:
-                raise ValueError("Client id not found in connections!  ({})".format(str(client_id)))
+                raise ValueError("Client id not found in connections!  ({})".format(client_id))
 
             if not isinstance(self.connections[client_id], SocketConnection):
                 raise ValueError("Not sure how this happened.")
