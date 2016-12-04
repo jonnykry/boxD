@@ -73,7 +73,6 @@ var Board = {
         this.context.translate((this.camera.x),(this.camera.y));
     },
 
-    // edge = {src: {x: int, y: int}, dst: {x: int, y: int}, owner: String}
     claimEdge: function(x1, y1, x2, y2, color) {
         // TODO: Proper edge claiming
         // If valid, render and edge and notify server via websockets
@@ -86,12 +85,14 @@ var Board = {
         ctx = this.context;
         ctx.beginPath();
         ctx.save();
-        if (current < 0.75){
+
+        if (current < 0.75) {
             ctx.strokeStyle = '#99CC33';
         }
         else {
             ctx.strokeStyle = '#ff0000';
         }
+
         ctx.lineCap = 'square';
         ctx.lineWidth = 10.0;
         ctx.arc(120 -this.camera.x, 120-this.camera.y, 70, -(Math.PI / 2), (( Math.PI * 2)) , false);
