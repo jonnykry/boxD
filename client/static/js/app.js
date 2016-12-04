@@ -91,7 +91,7 @@ $(document).ready( function() {
         }
 
         var _socket = new WebSocket(host);
-        //console.log("socket status: " + socket.readyState);
+        console.log("socket status: " + _socket.readyState);
 
         var $nickname = $('#nickname');
         var $startGame = $('#startGame');
@@ -142,12 +142,25 @@ $(document).ready( function() {
             _socket.onmessage = function (msg) {
                 // TODO: Set listeners and call subsequent functions
                 console.log(msg);
-                if (msg === 'line_claimed') {
+                var data = {};
+
+                try {
+                    data = JSON.parse(msg.data);
+                } catch(err) {
+                    data = msg.data;
+                }
+
+                if (data.type === 'line_claimed') {
                     console.log('A line was successfully claimed on the server.');
-                    console.log(msg.data);
-                    // TODO: call board.claimEdge(data);
+                    console.log(data);
+
+                    // TODO: grab color from data
+                    // x1, y1, x2, y2, color
+                    board.claimEdge(data.data.point1.col, data.data.point1.row, data.data.point2.col, data.data.point2.row, 'blue');
+                } else if (data.type === 'box_created') {
+                    console.log('A box was successfully created on the server.');
                 } else {
-                    showServerResponse(msg.data);
+                    showServerResponse(data);
                 }
             };
 
