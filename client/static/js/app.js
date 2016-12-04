@@ -159,6 +159,7 @@ $(document).ready( function() {
                     // x1, y1, x2, y2, color
                     board.claimEdge(data.data.point1.col, data.data.point1.row, data.data.point2.col, data.data.point2.row, 'blue');
                 } else if (data.type === 'box_created') {
+                    board.claimSquare(data.data.corner.col, data.data.corner.row,'blue');
                     console.log('A box was successfully created on the server.');
                 } else {
                     showServerResponse(data);
