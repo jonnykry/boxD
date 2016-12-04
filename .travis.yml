@@ -13,7 +13,13 @@ install:
   - "pip install pylint"
 
 # command to run tests
-script: nosetests --with-coverage --cover-erase --cover-inclusive 
+script: nosetests --with-coverage --cover-erase --cover-inclusive --cover-package=pylint_server
+
+after_success:
+  - coveralls
+  - pylint --output-format=html pylint_server > /tmp/pylint-report.html
+  - curl -v -m 120 -X POST -F travis-job-id=$TRAVIS_JOB_ID -F pylint-report=@/tmp/pylint-report.html https://pylint.desmondrivet.com/reports
+
 # Run on all dev branches including master.
 branches:
   only:
