@@ -3,12 +3,12 @@ import unittest
 from server.boxd_runner import GameRunner
 
 
-class TestBoxdRunner(unittest.TestCase):
+class BoxdRunnerTest(unittest.TestCase):
 
     def setUp(self):
         GameRunner.reset()
 
-    def test_get_remove_player(self):
+    def testGetRemovePlayer(self):
         GameRunner.assign_player("0")
         GameRunner.assign_player("1")
         GameRunner.assign_player("2")
@@ -72,7 +72,7 @@ class TestBoxdRunner(unittest.TestCase):
 
         client_id = "0"
         GameRunner.assign_player(client_id)
-        self.assertEqual(GameRunner.get_player_name(client_id), "Unnamed Player")
+        self.assertEqual(GameRunner.get_player_name(client_id), "Muhammad Ali0")
 
         GameRunner.update_player_name(client_id, "Bernie Sanders")
         self.assertEqual(GameRunner.get_player_name(client_id), "Bernie Sanders")

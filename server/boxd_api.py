@@ -1,5 +1,7 @@
 import tornado.websocket
 import json
+import time
+from threading import Thread
 from boxd_runner import GameRunner, CooldownError
 from models import message as messages
 
@@ -21,6 +23,13 @@ class ConnectionManager(object):
 
         def __init__(self):
             self.connections = {}
+            t = Thread(target=self.poke_all_connections)
+            t.start()
+
+        def poke_all_connections(self):
+            while True:
+                time.sleep(45)
+                self.send_to_all(self.connections.keys(), json.dumps({"stay_with_me": True}))
 
         def connected_clients(self):
             return len(self.connections)
@@ -33,7 +42,7 @@ class ConnectionManager(object):
         def send_message(self, client_id, message):
 
             if client_id not in self.connections:
-                raise ValueError("Client id not found in connections!  ({})".format(str(client_id)))
+                raise ValueError("Client id not found in connections!  ({})".format(client_id))
 
             if not isinstance(self.connections[client_id], SocketConnection):
                 raise ValueError("Not sure how this happened.")
@@ -41,6 +50,7 @@ class ConnectionManager(object):
             self.connections[client_id].write_message(message)
 
         def send_to_all(self, client_ids, message):
+            print "Sending to all:  {}".format(message)
             for client_id in client_ids:
                 self.send_message(client_id, message)
 
@@ -56,7 +66,7 @@ class ConnectionManager(object):
 
         def remove_connection(self, client_id):
 
-            if not client_id in self.connections:
+            if client_id not in self.connections:
                 raise ValueError("Client id was not registered:  {}".format(client_id))
 
             self.connections.pop(client_id)
@@ -100,7 +110,6 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
         return True
 
     def open(self):
-
         # register connection
         ConnectionManager.register_connection(self.client_id, self)
 
@@ -128,7 +137,11 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
                 ConnectionManager.send_to_all(GameRunner.get_other_player_ids(self.client_id),
                                               "{} (client {}) joined the game".format(name, self.client_id))
 
-            # TODO:  elif message['type'] == 'LEAVE_GAME':
+            elif message['type'] == 'LEAVE_GAME':
+                other_players = GameRunner.get_other_player_ids(self.client_id)
+                ConnectionManager.send_to_all(other_players, "{} (Client {}) left".format(
+                GameRunner.get_player_name(self.client_id), self.client_id))
+                GameRunner.remove_player(self.client_id)
 
             elif message['type'] == 'NICKNAME':
                 name = message['data']['name']
@@ -155,7 +168,8 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
                     responses.append(messages.Message({"You're still cooling off...": True}))
 
                 # TODO:  Have errors propagate to this method instead of returning None
-                if new_boxes is not None:  # None means an Race Condition Error occurred. [] means there are no new boxes
+                # None means an Race Condition Error occurred. [] means there are no new boxes
+                if new_boxes is not None:
 
                     responses.append(messages.LineClaimedMessage((p1r, p1c), (p2r, p2c), self.client_id))
 
@@ -166,15 +180,15 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
                     ConnectionManager.send_to_all(GameRunner.get_players_from_game(self.client_id), json.dumps(response.get_message()))
 
     def on_close(self):
+        print 'connection closed due to:  {}'.format(self.close_reason)
 
-        other_players = GameRunner.get_other_player_ids(self.client_id)
-        ConnectionManager.send_to_all(other_players, "{} (Client {}) left".format(
-            GameRunner.get_player_name(self.client_id), self.client_id))
+        try:
+            other_players = GameRunner.get_other_player_ids(self.client_id)
+            ConnectionManager.send_to_all(other_players, "{} (Client {}) left".format(
+                GameRunner.get_player_name(self.client_id), self.client_id))
+            GameRunner.remove_player(self.client_id)
+
+        except ValueError:  # should only happen if the player is not in a game
+            pass
 
         ConnectionManager.remove_connection(self.client_id)
-        GameRunner.remove_player(self.client_id)
-
-
-
-        print 'connection closed...'
-
