@@ -1,6 +1,7 @@
 var scale = 100;
 var Board = {
     edges: [],
+    squares: [],
     canvas : document.createElement("canvas"),
     maxRows:40,
     maxCols:40,
@@ -78,6 +79,9 @@ var Board = {
         // If valid, render and edge and notify server via websockets
         this.edges.push(new Edge(x1, y1, x2, y2, color));
     },
+    claimSquare: function(x1, y1, color) {
+            this.squares.push(new Square(x1, y1,color));
+        },
     next_move_timer: function(current) {
         ctx = this.context;
         ctx.beginPath();
@@ -192,7 +196,9 @@ function updateBoard(timestamp) {
         Board.edges[i].update();
         Board.edges[i].mini_map_update();
     }
-
+    for (var i = 0; i < Board.squares.length; i++) {
+        Board.squares[i].update();
+    }
     if (Board.curX > (Board.canvas.width -100) && Board.camera.x > -3000) {
         Board.camera.x -= 10;
         Board.moveContext();
@@ -251,4 +257,20 @@ function Edge(x, y, x2, y2, color) {
         ctx.restore();
 
     }
+
 }
+
+function Square(x , y , color) {
+    this.x = x;
+    this.y = y;
+    this.color = color;
+    this.update = function() {
+        var ctx = Board.context;
+        ctx.save();
+        ctx.fillStyle = this.color;
+        ctx.fillRect((this.x *scale) , (this.y *scale) , scale, scale);
+        ctx.restore();
+
+
+        }
+    }

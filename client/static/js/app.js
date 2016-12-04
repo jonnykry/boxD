@@ -50,6 +50,7 @@ $(document).ready( function() {
             socket.send(JSON.stringify(request));
 
             board.claimEdge(points.pointX, points.pointY, points.pointX2, points.pointY2, player.color);
+            //board.claimSquare(points.pointX, points.pointY, player.color);
         });
 
         board.canvas.addEventListener('mousemove', function(e) {
