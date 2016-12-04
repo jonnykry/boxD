@@ -1,4 +1,3 @@
-
 $(document).ready( function() {
     $('#entryModal').modal({show: true});
 
@@ -17,22 +16,37 @@ $(document).ready( function() {
             mouseX -= board.camera.x;
             mouseY -= board.camera.y;
 
-            var points = board.getPointsByCursor(mouseX, mouseY);
+            if(mouseX > scale && mouseY > scale && mouseX < board.maxCols * scale && mouseY < board.maxCols * scale ){
 
-            console.log(points.pointX, points.pointY, points.pointX2, points.pointY2);
+                var points = board.getPointsByCursor(mouseX, mouseY);
 
-            // TODO:  If the edge is valid, let's do it
-            // Note:  Pass as (y, x) since backend uses (r, c)
-            var request = {
-               type:  'CLAIM_LINE',
-               data: {
-                   pt1_r: points.pointY,
-                   pt1_c: points.pointX,
-                   pt2_r: points.pointY2,
-                   pt2_c: points.pointX2
-               }
-            };
+                console.log(points.pointX, points.pointY, points.pointX2, points.pointY2);
 
+                // TODO:  If the edge is valid, let's do it
+                // Note:  Pass as (y, x) since backend uses (r, c)
+                var request = {
+                   type:  'CLAIM_LINE',
+                   data: {
+                       pt1_r: points.pointY,
+                       pt1_c: points.pointX,
+                       pt2_r: points.pointY2,
+                       pt2_c: points.pointX2
+                   }
+                };
+            }
+            //if it passes update cooloff timer
+            var d = new Date();
+            var s = d.getSeconds();
+            console.log(s);
+            var carryover = 0;
+            if (s>=55){
+                carryover = s - 60;
+            }
+
+            board.move_timer=s+5 + carryover;
+            board.cooloff_timer=s;
+            board.next_move=s+15 + carryover;
+            board.cooloff_end=s+5 + carryover;
             socket.send(JSON.stringify(request));
 
             board.claimEdge(points.pointX, points.pointY, points.pointX2, points.pointY2, player.color);
@@ -46,9 +60,12 @@ $(document).ready( function() {
             mouseX -= board.camera.x;
             mouseY -= board.camera.y;
 
-            var points = board.getPointsByCursor(mouseX, mouseY);
+            if(mouseX > 100 && mouseY > 100 && mouseX < board.maxCols * scale && mouseY < board.maxCols * scale){
+                var points = board.getPointsByCursor(mouseX, mouseY);
 
-            board.setCursor(points.pointX, points.pointY, points.pointX2, points.pointY2, player.color)
+                board.setCursor(points.pointX, points.pointY, points.pointX2, points.pointY2, player.color);
+
+            }
         });
     }
 
@@ -124,6 +141,7 @@ $(document).ready( function() {
 
             _socket.onmessage = function (msg) {
                 // TODO: Set listeners and call subsequent functions
+                console.log(msg);
                 if (msg === 'line_claimed') {
                     console.log('A line was successfully claimed on the server.');
                     console.log(msg.data);
@@ -134,6 +152,7 @@ $(document).ready( function() {
             };
 
             _socket.onclose = function () {
+                console.log("Closed");
                 showServerResponse('The connection has been closed.');
             }
         } else {
