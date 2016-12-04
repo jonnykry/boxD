@@ -9,24 +9,11 @@ notifications:
 # Install requirements
 install:
   - "pip install -r requirements.txt"
+  - "pip install coveralls"
+  - "pip install pylint"
 
-# Required - Runs tests at the moment TODO silent mode
-script:
-- echo "Backend Tests"
-
-- echo "Running board_test.py"
-- python server/test/board_test.py
-
-- echo "Running runner_test.py"
-- python server/test/runner_test.py
-
-- echo "Frontend Tests"
-- echo "No Frontend Tests at the moment"
-
-# Check Linting
-#after_success:
-#  - pylint --output-format=html pylint_server > /tmp/pylint-report.html
-#  - curl -v -m 120 -X POST -F travis-job-id=$TRAVIS_JOB_ID -F pylint-report=@/tmp/pylint-report.html https://pylint.whatever.com/reports
+# command to run tests
+script: nosetests --with-coverage --cover-erase --cover-inclusive --cover-package=pylint_server
 
 # Run on all dev branches including master.
 branches:

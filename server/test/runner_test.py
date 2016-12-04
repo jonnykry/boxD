@@ -1,6 +1,10 @@
-import unittest
+import unittest,os,sys
+path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if not path in sys.path:
+    sys.path.insert(1, path)
+del path
 
-from server.boxd_runner import GameRunner
+from boxd_runner import GameRunner
 
 
 class BoxdRunnerTest(unittest.TestCase):
