@@ -1,25 +1,55 @@
+from datetime import datetime, timedelta
+
+COOLDOWN_SECONDS = 0
+
+
 class BoxdGame(object):
+
+    __COLOR_OPTIONS = [
+        '#001b33', '#664133', '#858c69', '#1f00e6', '#00eeff', '#330700', '#007300', '#269991', '#005ce6', '#ff9180',
+        '#1c330d', '#735839', '#b28f00', '#ac39e6', '#bfd9ff', '#263328', '#395873', '#0099bf', '#e673cf', '#d9ffbf',
+        '#474d00', '#6f3973', '#00bf00', '#c2f200', '#bfffea', '#4d2636', '#004480', '#30bf7c', '#f20041', '#311659',
+        '#7f2020', '#bf8f96', '#7999f2', '#2d593e', '#6c6080', '#cc6d00', '#f2ceb6', '#435958', '#008c00', '#d93677',
+        '#ff4400'
+    ]
 
     def __init__(self):
         self.__players = []
+        self.__id_player_map = {}
+        self.__scores = {}
         self.__board = Board(50, 50)
+        self.__claimed_colors = {}
 
-    def add_player(self, player_id):
+        for color_str in BoxdGame.__COLOR_OPTIONS:
+            self.__claimed_colors[color_str] = None
+
+    def add_player(self, player_id, nickname):
 
         if player_id in self.__players:
             raise ValueError("Player already in game:  {}".format(player_id))
 
+        player_color = self.__get_unclaimed_color()
+        self.__claimed_colors[player_color] = player_id
         self.__players.append(player_id)
+        self.__id_player_map[player_id] = Player(player_id, nickname, player_color)
+
+    '''
+    '  Removes the player with player_id from the game
+    '
+    '  Returns a list of all of their owned boxes (so the client can black them out)
+    '''
 
     def remove_player(self, player_id):
 
         if player_id not in self.__players:
             raise ValueError("Player is not in game:  {}".format(player_id))
 
-        # find all of the boxes owned by player_id
+        player = self.__id_player_map[player_id]
+
+        # find all of the boxes owned by player_id (TODO:  currently broken)
         to_void = []
-        for (point, owner_id) in self.__board.get_boxes():
-            if owner_id == player_id:
+        for (point, color) in self.__board.get_boxes():
+            if color == player_id:  # todo:  figure out a way to remember which boxes a player owned. (hint: use a map)
                 to_void.append(point)
 
         # remove player_id from ownership
@@ -27,23 +57,67 @@ class BoxdGame(object):
             for box_corner in to_void:
                 self.__board.remove_box_owner(box_corner)
 
-        self.__players.remove(player_id)
+        self.__players.remove(player_id)            # remove player id from list of player ids
+        self.__claimed_colors[player.color] = None  # set the color option to 'unclaimed'
+        self.__id_player_map.pop(player_id)         # remove the player object from the player map
 
         # for now, leave all lines owned by player_id.  Those can stay
+        return to_void
 
     def get_players(self):
         return self.__players
 
+    def get_edges(self):
+        return self.__board.get_edges()
+
+    def get_boxes(self):
+        return self.__board.get_boxes()
+
     def claim_line(self, pt1, pt2, player_id):
 
+        current_time = datetime.now()
+
+        if current_time < self.get_player_nextmove_time(player_id):
+            return None
+
         try:
-            return self.__board.claim_edge(pt1, pt2, player_id)
+            # set players next possible move time to current time + cooldown seconds
+
+            player_color = self.get_player_color(player_id)
+            self.__id_player_map[player_id].next_move = current_time + timedelta(seconds=COOLDOWN_SECONDS)
+            new_boxes = self.__board.claim_edge(pt1, pt2, player_color)
+            return new_boxes
 
         except ValueError:
             # line was somehow invalid
             return None
 
+    def get_player_color(self, player_id):
+        return self.__id_player_map[player_id].color
+
+    def get_player_name(self, player_id):
+        return self.__id_player_map[player_id].name
+
+    def get_player_nextmove_time(self, player_id):
+        return self.__id_player_map[player_id].next_move
+
+    '''
+    ' Returns a color string for an unclaimed color
+    '''
+    def __get_unclaimed_color(self):
+        for color_str in self.__claimed_colors:
+            if not self.__claimed_colors[color_str]:
+                return color_str
+
+
 # TODO:  Figure out how to move back to models?
+class Player(object):
+
+    def __init__(self, player_id, name, color):
+        self.player_id = player_id
+        self.name = name
+        self.color = color
+        self.next_move = datetime.now()
 
 """
 '  Class modeling a box game board
@@ -135,13 +209,13 @@ class Board(object):
     ''  Raises an EdgeOwnedError if the edge is already owned
     ''  Raises a ValueError if the edge is invalid or owner is None
     '''
-    def claim_edge(self, p1, p2, owner):
+    def claim_edge(self, p1, p2, color):
 
         if len(p1) != 2 or len(p2) != 2:
             raise ValueError("A point was not a tuple of len 2: {}, {}".format(p1, p2))
 
-        if not owner:
-            raise ValueError("Owner should not be None")
+        if not color:
+            raise ValueError("Color should not be None")
 
         if not self.__is_valid_edge(p1, p2):
             raise ValueError("Edge is not valid:  {}, {}".format(p1, p2))
@@ -153,10 +227,10 @@ class Board(object):
 
         created_boxes = self.__get_new_boxes(p1, p2)
 
-        self.__edges[p1][p2] = owner
+        self.__edges[p1][p2] = color
 
         for box in created_boxes:
-            self.__boxes[box] = owner
+            self.__boxes[box] = color
 
         return created_boxes
 
@@ -171,7 +245,25 @@ class Board(object):
         if box_corner not in self.__boxes:
             raise ValueError("Box does not exist:  {}".format(box_corner))
 
-        self.__boxes[box_corner] = None
+        self.__boxes[box_corner] = '#000000'
+
+    '''
+    '  Returns a list of tuples discribing the edge and its owner
+    '''
+    def get_edges(self):
+        edges = []
+        for point1, point2_map in self.__edges.iteritems():
+            for point2, owner_color in point2_map.iteritems():
+                if owner_color is not None:
+                  edges.append((point1, point2, owner_color))
+        return edges
+
+    def get_boxes(self):
+        boxes = []
+        for corner_point, owner in self.__boxes.iteritems():
+            boxes.append((corner_point, owner))
+
+        return boxes
 
     '''
     '' Returns the list of boxes that would be made by adding a line

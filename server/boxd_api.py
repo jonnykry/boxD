@@ -127,9 +127,13 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
                 return
 
             if message['type'] == 'JOIN_GAME':
-                name = message['data']['name']
-                assigned_game = GameRunner.assign_player(self.client_id)
-                GameRunner.update_player_name(self.client_id, name)
+
+                #  TODO:  Send full board data as response
+
+                name = message['data']['name'] or 'Unnamed Player'
+
+                assigned_game = GameRunner.assign_player(self.client_id, name)
+                board_edges, board_boxes = GameRunner.get_board_info(self.client_id)
 
                 ConnectionManager.send_message(self.client_id, "You joined game {} as {}".format(assigned_game, name))
                 ConnectionManager.send_message(self.client_id, "The game has the following players:  {}"
@@ -137,21 +141,16 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
                 ConnectionManager.send_to_all(GameRunner.get_other_player_ids(self.client_id),
                                               "{} (client {}) joined the game".format(name, self.client_id))
 
+                # generate and send message about the board state
+                ConnectionManager.send_message(self.client_id, json.dumps(messages.BoardStateMessage(board_edges, board_boxes).get_message()))
+
+
+
             elif message['type'] == 'LEAVE_GAME':
                 other_players = GameRunner.get_other_player_ids(self.client_id)
                 ConnectionManager.send_to_all(other_players, "{} (Client {}) left".format(
                 GameRunner.get_player_name(self.client_id), self.client_id))
                 GameRunner.remove_player(self.client_id)
-
-            elif message['type'] == 'NICKNAME':
-                name = message['data']['name']
-                previous_name = GameRunner.get_player_name(self.client_id)
-                GameRunner.update_player_name(self.client_id, name)
-                response = messages.NameChangedMessage(self.client_id, name)
-                ConnectionManager.send_to_all(GameRunner.get_players_from_game(self.client_id),
-                                              "{} changed their name to {}".format(previous_name, name))
-                ConnectionManager.send_to_all(GameRunner.get_players_from_game(self.client_id),
-                                              json.dumps(response.get_message()))
 
             elif message['type'] == "CLAIM_LINE":
                 p1r = message['data']['pt1_r']
@@ -159,11 +158,15 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
                 p2r = message['data']['pt2_r']
                 p2c = message['data']['pt2_c']
 
+                pt1 = (p1r, p1c)
+                pt2 = (p2r, p2c)
+
                 responses = []
                 new_boxes = None
+                player_color = GameRunner.get_player_color(self.client_id)
 
                 try:
-                    new_boxes = GameRunner.claim_line(self.client_id, p1r, p1c, p2r, p2c)
+                    new_boxes = GameRunner.claim_line(self.client_id, pt1, pt2)
                 except CooldownError:
                     responses.append(messages.Message({"You're still cooling off...": True}))
 
@@ -171,10 +174,10 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
                 # None means an Race Condition Error occurred. [] means there are no new boxes
                 if new_boxes is not None:
 
-                    responses.append(messages.LineClaimedMessage((p1r, p1c), (p2r, p2c), self.client_id))
+                    responses.append(messages.LineClaimedMessage((p1r, p1c), (p2r, p2c), player_color))
 
                     for new_box in new_boxes:
-                        responses.append(messages.BoxCreatedMessage(new_box, self.client_id))
+                        responses.append(messages.BoxCreatedMessage(new_box, player_color))
 
                 for response in responses:
                     ConnectionManager.send_to_all(GameRunner.get_players_from_game(self.client_id), json.dumps(response.get_message()))

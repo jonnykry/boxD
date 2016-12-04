@@ -62,3 +62,48 @@ class NameChangedMessage(Message):
         }
         super(NameChangedMessage, self).__init__(msg)
 
+
+class BoardStateMessage(Message):
+    def __init__(self, edges, boxes):
+
+        edge_data = []
+        box_data = []
+
+        for edge_tuple in edges:
+            point1 = edge_tuple[0]
+            point2 = edge_tuple[1]
+            color = edge_tuple[2]
+            data_map = {
+                'point1': {
+                    'row': point1[0],
+                    'col': point1[1],
+                },
+                'point2': {
+                    'row': point2[0],
+                    'col': point2[1],
+                },
+                'color': color
+            }
+            edge_data.append(data_map)
+
+        for box_tuple in boxes:
+            box_corner = box_tuple[0]
+            print(str(box_corner))
+            box_color = box_tuple[1]
+            data_map = {
+                'corner': {
+                    'row': box_corner[0],
+                    'col': box_corner[1]
+                },
+                'color': box_color
+            }
+            box_data.append(data_map)
+
+        msg = {
+            'type': 'board_state',
+            'data': {
+                'edges': edge_data,
+                'boxes': box_data
+            }
+        }
+        super(BoardStateMessage, self).__init__(msg)
