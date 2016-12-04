@@ -4,8 +4,6 @@ import sys
 from datetime import datetime, timedelta
 
 
-COOLDOWN_SECONDS = 0
-
 
 class GameRunner(object):
 
@@ -14,15 +12,14 @@ class GameRunner(object):
     class __GameRunner(object):
 
         def __init__(self):
-            self.player_game_map = {}
+            self.client_game_map = {}
             self.running_games = []
-            self.players = {}
 
         '''
         ' Returns the list of every player_ids (for every player)
         '''
         def get_player_ids(self):
-            return self.players.keys()
+            return self.client_game_map.keys()
 
         '''
         ' Puts the player in an open game.  If no games are open, creates a new game and assigns the player to it
@@ -34,10 +31,13 @@ class GameRunner(object):
         '
         ' Returns the game_id of the game the player was assigned to
         '''
-        def assign_player(self, player_id, nickname=None):
+        def assign_player(self, client_id, nickname):
 
-            if player_id in self.players or player_id in self.player_game_map:
-                raise ValueError("Player already assigned:  {}".format(player_id))
+            if client_id in self.client_game_map:
+                raise ValueError("Player already assigned:  {}".format(client_id))
+
+            if nickname is None:
+                raise ValueError("YOU NEED A NAME")
 
             # todo:  grow number of running games and actually pick the best game to assign
             if not self.running_games:
@@ -45,11 +45,9 @@ class GameRunner(object):
 
             best_game = self.running_games[0]
 
-            best_game.add_player(player_id)
+            best_game.add_player(client_id, nickname)
 
-            self.players[player_id] = Player(player_id, nickname)
-            self.player_game_map[player_id] = self.running_games[0]
-            self.change_player_nickname(player_id, nickname)
+            self.client_game_map[client_id] = self.running_games[0]
 
             return 0  # todo:  returned id of room the user was assigned to
 
@@ -64,40 +62,21 @@ class GameRunner(object):
         def remove_player(self, player_id):
 
             # remove player from the actual boxd game
-            self.player_game_map[player_id].remove_player(player_id)
+            self.client_game_map[player_id].remove_player(player_id)
 
             # remove player from the player_game map
-            game = self.player_game_map[player_id]
-            self.player_game_map.pop(player_id)
-
-            self.players.pop(player_id)
+            game = self.client_game_map[player_id]
+            self.client_game_map.pop(player_id)
 
             # if game is empty, shut it down.
             if not game.get_players():
                 self.running_games.remove(game)
 
-        '''
-        ' Changes the specified player's nickname.
-        '
-        ' player_id:  The id of the player whose name is being changed
-        ' nickname:   The new name for the player
-        '
-        ' Raises ValueError if the player_id is not registered
-        '''
-        def change_player_nickname(self, player_id, nickname):
-
-            if player_id not in self.players:
-                raise ValueError("Player wasn't found: {}".format(player_id))
-
-            if not nickname:
-                nickname = "Muhammad Ali{}".format(player_id)
-
-            self.players[player_id].name = nickname
 
         '''
         ' Claims the line specified by (p1_r, p1_c), (p2_r, p2_c) for the player specified by player_id
         '
-        ' player_id:  the id of the player claiming the line
+        ' client_id:  the id of the player claiming the line
         ' p1_r:       point1's row index
         ' p1_c:       point1's column index
         ' p2_r:       point2's row index
@@ -108,29 +87,24 @@ class GameRunner(object):
         '
         ' Returns the list of boxes created by claiming an edge
         '''
-        def claim_line(self, player_id, p1_r, p1_c, p2_r, p2_c):
+        def claim_line(self, client_id, pt1, pt2):
 
-            if player_id not in self.players:
-                raise ValueError("Player wasn't found: {}".format(player_id))
+            if client_id not in self.client_game_map:
+                raise ValueError("Player wasn't found: {}".format(client_id))
 
-            if player_id not in self.player_game_map:
-                raise ValueError("Player wasn't in a game:  {}".format(player_id))
+            if client_id not in self.client_game_map:
+                raise ValueError("Player wasn't in a game:  {}".format(client_id))
 
             # check if the player is past their cool down time
-            if datetime.now() < self.players[player_id].next_move:
+            if datetime.now() < self.client_game_map[client_id].get_player_nextmove_time(client_id):
                 raise CooldownError()
 
             # get the player's game
-            players_game = self.player_game_map[player_id]
-            # create points from message data
-            pt1 = (p1_r, p1_c)
-            pt2 = (p2_r, p2_c)
+            players_game = self.client_game_map[client_id]
 
             try:
                 # attempt to claim the line
-                new_boxes = players_game.claim_line(pt1, pt2, player_id)  # see boxd_game.BoxdGame.claim_line
-                # set players next possible move time to current time + cooldown seconds
-                self.players[player_id].next_move = datetime.now() + timedelta(seconds=COOLDOWN_SECONDS)
+                new_boxes = players_game.claim_line(pt1, pt2, client_id)  # see boxd_game.BoxdGame.claim_line
 
             except game.boxd_game.EdgeOwnedError:
                 print "Edge already claimed!  {}, {}".format(pt1, pt2)
@@ -151,43 +125,60 @@ class GameRunner(object):
         '
         ' Returns a list of player_ids representing every player in "player_id"'s game
         '''
-        def get_players(self, player_id):
-            if player_id not in self.players:
-                raise ValueError("Player wasn't found: {}".format(player_id))
+        def get_players(self, client_id):
+            if client_id not in self.client_game_map:
+                raise ValueError("Player wasn't found: {}".format(client_id))
 
-            if player_id not in self.player_game_map:
-                raise ValueError("Player wasn't in a game:  {}".format(player_id))
+            if client_id not in self.client_game_map:
+                raise ValueError("Player wasn't in a game:  {}".format(client_id))
 
-            players_game = self.player_game_map[player_id]
+            players_game = self.client_game_map[client_id]
             return players_game.get_players()
 
         '''
-        ' Returns the nickname of the player specified by player_id
+        ' Returns the nickname of the player specified by client_id
         '
-        ' player_id:  The player whose name we're tyring to find
+        ' client_id:  The player whose name we're tyring to find
         '
         ' Raises ValueError if the player cannot be found
         '
         ' Returns the player's name
         '''
-        def get_player_name(self, player_id):
+        def get_player_name(self, client_id):
 
-            if player_id not in self.players:
-                raise ValueError("Player wasn't found: {}".format(player_id))
+            if client_id not in self.client_game_map:
+                raise ValueError("Player wasn't found: {}".format(client_id))
 
-            player = self.players[player_id]
-            return player.name
+            player = self.client_game_map[client_id].get_player_name(client_id)
+            return player
+
+        def get_player_color(self, client_id):
+            if client_id not in self.client_game_map:
+                raise ValueError("Player wasn't found: {}".format(client_id))
+
+            return self.client_game_map[client_id].get_player_color(client_id)
+
+
+        def get_board_info(self, client_id):
+
+            if client_id not in self.client_game_map:
+                raise ValueError("Player wasn't found: {}".format(client_id))
+
+            edges = self.client_game_map[client_id].get_edges()
+            boxes = self.client_game_map[client_id].get_boxes()
+
+            return edges, boxes
 
     @staticmethod
-    def claim_line(player_id, p1_r, p1_c, p2_r, p2_c):
-        new_boxes = GameRunner.__instance.claim_line(player_id, p1_r, p1_c, p2_r, p2_c)
+    def claim_line(client_id, pt1, pt2):
+        new_boxes = GameRunner.__instance.claim_line(client_id, pt1, pt2)
         if new_boxes is None:
             return None
         return list(new_boxes)
 
     @staticmethod
-    def assign_player(player_id):
-        return GameRunner.__instance.assign_player(player_id)
+    def assign_player(player_id, name):
+        return GameRunner.__instance.assign_player(player_id, name)
 
     @staticmethod
     def remove_player(player_id):
@@ -197,6 +188,14 @@ class GameRunner(object):
     def update_player_name(player_id, name):
         # TODO:  Error checking
         GameRunner.__instance.change_player_nickname(player_id, name)
+
+    @staticmethod
+    def get_board_info(client_id):
+        return GameRunner.__instance.get_board_info(client_id)
+
+    @staticmethod
+    def get_player_color(client_id):
+        return GameRunner.__instance.get_player_color(client_id)
 
     @staticmethod
     def get_players_from_game(player_id):
@@ -217,8 +216,8 @@ class GameRunner(object):
         return players
 
     @staticmethod
-    def get_player_name(player_id):
-        return GameRunner.__instance.get_player_name(player_id)
+    def get_player_name(client_id):
+        return GameRunner.__instance.get_player_name(client_id)
 
     @staticmethod
     def create():
@@ -228,14 +227,6 @@ class GameRunner(object):
     @staticmethod
     def reset():
         GameRunner.__instance = GameRunner.__GameRunner()
-
-
-class Player(object):
-
-    def __init__(self, player_id, name):
-        self.player_id = player_id
-        self.name = name or "Muhammad Ali{}".format(player_id)
-        self.next_move = datetime.now()
 
 
 class CooldownError(Exception):
