@@ -127,9 +127,12 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
                 return
 
             if message['type'] == 'JOIN_GAME':
-                name = message['data']['name']
-                assigned_game = GameRunner.assign_player(self.client_id)
-                GameRunner.update_player_name(self.client_id, name)
+
+                #  TODO:  Send full board data as response
+
+                name = message['data']['name'] or 'Unnamed Player'
+
+                assigned_game = GameRunner.assign_player(self.client_id, name)
 
                 ConnectionManager.send_message(self.client_id, "You joined game {} as {}".format(assigned_game, name))
                 ConnectionManager.send_message(self.client_id, "The game has the following players:  {}"
@@ -143,16 +146,6 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
                 GameRunner.get_player_name(self.client_id), self.client_id))
                 GameRunner.remove_player(self.client_id)
 
-            elif message['type'] == 'NICKNAME':
-                name = message['data']['name']
-                previous_name = GameRunner.get_player_name(self.client_id)
-                GameRunner.update_player_name(self.client_id, name)
-                response = messages.NameChangedMessage(self.client_id, name)
-                ConnectionManager.send_to_all(GameRunner.get_players_from_game(self.client_id),
-                                              "{} changed their name to {}".format(previous_name, name))
-                ConnectionManager.send_to_all(GameRunner.get_players_from_game(self.client_id),
-                                              json.dumps(response.get_message()))
-
             elif message['type'] == "CLAIM_LINE":
                 p1r = message['data']['pt1_r']
                 p1c = message['data']['pt1_c']
@@ -161,9 +154,10 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
 
                 responses = []
                 new_boxes = None
+                new_box_color = None
 
                 try:
-                    new_boxes = GameRunner.claim_line(self.client_id, p1r, p1c, p2r, p2c)
+                    new_boxes, new_box_color = GameRunner.claim_line(self.client_id, p1r, p1c, p2r, p2c)
                 except CooldownError:
                     responses.append(messages.Message({"You're still cooling off...": True}))
 
@@ -174,7 +168,7 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
                     responses.append(messages.LineClaimedMessage((p1r, p1c), (p2r, p2c), self.client_id))
 
                     for new_box in new_boxes:
-                        responses.append(messages.BoxCreatedMessage(new_box, self.client_id))
+                        responses.append(messages.BoxCreatedMessage(new_box, new_box_color))
 
                 for response in responses:
                     ConnectionManager.send_to_all(GameRunner.get_players_from_game(self.client_id), json.dumps(response.get_message()))
