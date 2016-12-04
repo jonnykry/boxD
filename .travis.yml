@@ -13,8 +13,7 @@ install:
   - "pip install pylint"
 
 # command to run tests
-script: nosetests --with-coverage --cover-erase --cover-inclusive --cover-package=pylint_server
-
+script: nosetests --with-coverage --cover-erase --cover-inclusive 
 # Run on all dev branches including master.
 branches:
   only:
