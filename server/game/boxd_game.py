@@ -2,7 +2,7 @@ class BoxdGame(object):
 
     def __init__(self):
         self.__players = []
-        self.__board = Board(10, 10)
+        self.__board = Board(50, 50)
 
     def add_player(self, player_id):
 
@@ -42,8 +42,6 @@ class BoxdGame(object):
         except ValueError:
             # line was somehow invalid
             return None
-
-
 
 # TODO:  Figure out how to move back to models?
 
@@ -275,10 +273,10 @@ class Board(object):
         except ValueError:
             return False
 
-        if p1[0] < 0 or p1[1] < 0 or p1[0] > self.__rows or p1[1] > self.__cols:
+        if p1[0] < 0 or p1[1] < 0 or p1[0] >= self.__rows or p1[1] >= self.__cols:
             return False
 
-        if p2[0] < 0 or p2[1] < 0 or p2[0] > self.__rows or p2[1] > self.__cols:
+        if p2[0] < 0 or p2[1] < 0 or p2[0] >= self.__rows or p2[1] >= self.__cols:
             return False
 
         return bool(abs(p1[0] - p2[0]) == 1) ^ bool(abs(p1[1] - p2[1]) == 1)

@@ -13,7 +13,6 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
         loader = tornado.template.Loader(".")
         self.write(loader.load("./../client/index.html").generate())
-        print "LOCAL: {}".format(str(self.get_query_arguments('local')))
 
 
 application = tornado.web.Application([
