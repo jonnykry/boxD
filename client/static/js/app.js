@@ -142,12 +142,21 @@ $(document).ready( function() {
             _socket.onmessage = function (msg) {
                 // TODO: Set listeners and call subsequent functions
                 console.log(msg);
-                //var data = JSON.parse(msg.data);
-                var data = msg.data;
+                var data = {};
+
+                try {
+                    data = JSON.parse(msg.data);
+                } catch(err) {
+                    data = msg.data;
+                }
+
                 if (data.type === 'line_claimed') {
                     console.log('A line was successfully claimed on the server.');
                     console.log(data);
-                    // TODO: call board.claimEdge(data);
+
+                    // TODO: grab color from data
+                    // x1, y1, x2, y2, color
+                    board.claimEdge(data.data.point1.col, data.data.point1.row, data.data.point2.col, data.data.point2.row, 'blue');
                 } else if (data.type === 'box_created') {
                     console.log('A box was successfully created on the server.');
                 } else {
