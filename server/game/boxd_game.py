@@ -29,6 +29,7 @@ class BoxdGame(object):
             raise ValueError("Player already in game:  {}".format(player_id))
 
         player_color = self.__get_unclaimed_color()
+        self.__claimed_colors[player_color] = player_id
         self.__players.append(player_id)
         self.__id_player_map[player_id] = Player(player_id, nickname, player_color)
 
@@ -45,10 +46,10 @@ class BoxdGame(object):
 
         player = self.__id_player_map[player_id]
 
-        # find all of the boxes owned by player_id
+        # find all of the boxes owned by player_id (TODO:  currently broken)
         to_void = []
-        for (point, owner_id) in self.__board.get_boxes():
-            if owner_id == player_id:
+        for (point, color) in self.__board.get_boxes():
+            if color == player_id:  # todo:  figure out a way to remember which boxes a player owned. (hint: use a map)
                 to_void.append(point)
 
         # remove player_id from ownership
@@ -61,20 +62,31 @@ class BoxdGame(object):
         self.__id_player_map.pop(player_id)         # remove the player object from the player map
 
         # for now, leave all lines owned by player_id.  Those can stay
-        return to_void  #  TODO:  HANDLE THIS IN CALLING METHODS
+        return to_void
 
     def get_players(self):
         return self.__players
 
+    def get_edges(self):
+        return self.__board.get_edges()
+
+    def get_boxes(self):
+        return self.__board.get_boxes()
+
     def claim_line(self, pt1, pt2, player_id):
+
+        current_time = datetime.now()
+
+        if current_time < self.get_player_nextmove_time(player_id):
+            return None
 
         try:
             # set players next possible move time to current time + cooldown seconds
 
             player_color = self.get_player_color(player_id)
-            self.__id_player_map[player_id].next_move = datetime.now() + timedelta(seconds=COOLDOWN_SECONDS)
+            self.__id_player_map[player_id].next_move = current_time + timedelta(seconds=COOLDOWN_SECONDS)
             new_boxes = self.__board.claim_edge(pt1, pt2, player_color)
-            return new_boxes, player_color
+            return new_boxes
 
         except ValueError:
             # line was somehow invalid
@@ -234,6 +246,24 @@ class Board(object):
             raise ValueError("Box does not exist:  {}".format(box_corner))
 
         self.__boxes[box_corner] = '#000000'
+
+    '''
+    '  Returns a list of tuples discribing the edge and its owner
+    '''
+    def get_edges(self):
+        edges = []
+        for point1, point2_map in self.__edges.iteritems():
+            for point2, owner_color in point2_map.iteritems():
+                if owner_color is not None:
+                  edges.append((point1, point2, owner_color))
+        return edges
+
+    def get_boxes(self):
+        boxes = []
+        for corner_point, owner in self.__boxes.iteritems():
+            boxes.append((corner_point, owner))
+
+        return boxes
 
     '''
     '' Returns the list of boxes that would be made by adding a line

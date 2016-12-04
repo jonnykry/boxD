@@ -87,7 +87,7 @@ class GameRunner(object):
         '
         ' Returns the list of boxes created by claiming an edge
         '''
-        def claim_line(self, client_id, p1_r, p1_c, p2_r, p2_c):
+        def claim_line(self, client_id, pt1, pt2):
 
             if client_id not in self.client_game_map:
                 raise ValueError("Player wasn't found: {}".format(client_id))
@@ -101,13 +101,10 @@ class GameRunner(object):
 
             # get the player's game
             players_game = self.client_game_map[client_id]
-            # create points from message data
-            pt1 = (p1_r, p1_c)
-            pt2 = (p2_r, p2_c)
 
             try:
                 # attempt to claim the line
-                new_boxes, players_color = players_game.claim_line(pt1, pt2, client_id)  # see boxd_game.BoxdGame.claim_line
+                new_boxes = players_game.claim_line(pt1, pt2, client_id)  # see boxd_game.BoxdGame.claim_line
 
             except game.boxd_game.EdgeOwnedError:
                 print "Edge already claimed!  {}, {}".format(pt1, pt2)
@@ -117,7 +114,7 @@ class GameRunner(object):
                 traceback.print_exc(file=sys.stdout)
                 return None
 
-            return new_boxes, players_color
+            return new_boxes
 
         '''
         ' Finds the game the player specified by player_id is in and returns the list of all players in that game
@@ -128,18 +125,18 @@ class GameRunner(object):
         '
         ' Returns a list of player_ids representing every player in "player_id"'s game
         '''
-        def get_players(self, player_id):
-            if player_id not in self.client_game_map:
-                raise ValueError("Player wasn't found: {}".format(player_id))
+        def get_players(self, client_id):
+            if client_id not in self.client_game_map:
+                raise ValueError("Player wasn't found: {}".format(client_id))
 
-            if player_id not in self.client_game_map:
-                raise ValueError("Player wasn't in a game:  {}".format(player_id))
+            if client_id not in self.client_game_map:
+                raise ValueError("Player wasn't in a game:  {}".format(client_id))
 
-            players_game = self.client_game_map[player_id]
+            players_game = self.client_game_map[client_id]
             return players_game.get_players()
 
         '''
-        ' Returns the nickname of the player specified by player_id
+        ' Returns the nickname of the player specified by client_id
         '
         ' client_id:  The player whose name we're tyring to find
         '
@@ -155,9 +152,26 @@ class GameRunner(object):
             player = self.client_game_map[client_id].get_player_name(client_id)
             return player
 
+        def get_player_color(self, client_id):
+            if client_id not in self.client_game_map:
+                raise ValueError("Player wasn't found: {}".format(client_id))
+
+            return self.client_game_map[client_id].get_player_color(client_id)
+
+
+        def get_board_info(self, client_id):
+
+            if client_id not in self.client_game_map:
+                raise ValueError("Player wasn't found: {}".format(client_id))
+
+            edges = self.client_game_map[client_id].get_edges()
+            boxes = self.client_game_map[client_id].get_boxes()
+
+            return edges, boxes
+
     @staticmethod
-    def claim_line(player_id, p1_r, p1_c, p2_r, p2_c):
-        new_boxes = GameRunner.__instance.claim_line(player_id, p1_r, p1_c, p2_r, p2_c)
+    def claim_line(client_id, pt1, pt2):
+        new_boxes = GameRunner.__instance.claim_line(client_id, pt1, pt2)
         if new_boxes is None:
             return None
         return list(new_boxes)
@@ -174,6 +188,14 @@ class GameRunner(object):
     def update_player_name(player_id, name):
         # TODO:  Error checking
         GameRunner.__instance.change_player_nickname(player_id, name)
+
+    @staticmethod
+    def get_board_info(client_id):
+        return GameRunner.__instance.get_board_info(client_id)
+
+    @staticmethod
+    def get_player_color(client_id):
+        return GameRunner.__instance.get_player_color(client_id)
 
     @staticmethod
     def get_players_from_game(player_id):
