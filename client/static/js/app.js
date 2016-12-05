@@ -61,7 +61,7 @@ $(document).ready( function() {
             if(mouseX > 100 && mouseY > 100 && mouseX < board.maxCols * scale && mouseY < board.maxCols * scale){
                 var points = board.getPointsByCursor(mouseX, mouseY);
 
-                board.setCursor(points.pointX, points.pointY, points.pointX2, points.pointY2, player.color);
+                board.setCursor(points.pointX, points.pointY, points.pointX2, points.pointY2, game.player.color);
 
             }
         });
@@ -153,9 +153,10 @@ $(document).ready( function() {
                     console.log(data);
                     // TODO: grab color from data
                     // x1, y1, x2, y2, color
+                    game.player.color = data.data.owner;
                     board.claimEdge(data.data.point1.col, data.data.point1.row, data.data.point2.col, data.data.point2.row, data.data.owner);
                 } else if (data.type === 'box_created') {
-                    board.claimSquare(data.data.corner.col, data.data.corner.row,'blue');
+                    board.claimSquare(data.data.corner.col, data.data.corner.row,data.data.owner);
                     console.log('A box was successfully created on the server.');
                 } else {
                     showServerResponse(data);
