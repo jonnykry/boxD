@@ -48,8 +48,6 @@ $(document).ready( function() {
             board.next_move=s+15 + carryover;
             board.cooloff_end=s+5 + carryover;
             socket.send(JSON.stringify(request));
-
-            board.claimEdge(points.pointX, points.pointY, points.pointX2, points.pointY2, player.color);
         });
 
         board.canvas.addEventListener('mousemove', function(e) {
@@ -155,7 +153,7 @@ $(document).ready( function() {
                     console.log(data);
                     // TODO: grab color from data
                     // x1, y1, x2, y2, color
-                    board.claimEdge(data.data.point1.col, data.data.point1.row, data.data.point2.col, data.data.point2.row, 'blue');
+                    board.claimEdge(data.data.point1.col, data.data.point1.row, data.data.point2.col, data.data.point2.row, data.data.owner);
                 } else if (data.type === 'box_created') {
                     board.claimSquare(data.data.corner.col, data.data.corner.row,'blue');
                     console.log('A box was successfully created on the server.');
