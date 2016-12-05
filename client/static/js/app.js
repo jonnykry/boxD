@@ -151,21 +151,20 @@ $(document).ready( function() {
                 if (data.type === 'line_claimed') {
                     console.log('A line was successfully claimed on the server.');
                     console.log(data);
-                    // TODO: grab color from data
                     // x1, y1, x2, y2, color
                     game.player.color = data.data.owner;
                     board.claimEdge(data.data.point1.col, data.data.point1.row, data.data.point2.col, data.data.point2.row, data.data.owner);
                 } else if (data.type === 'box_created') {
                     board.claimSquare(data.data.corner.col, data.data.corner.row,data.data.owner);
                     console.log('A box was successfully created on the server.');
-                } else if (data.type === 'board_dump') {
-                    for (var edge in data.data.edges) {
+                } else if (data.type === 'board_state') {
+                    data.data.edges.forEach(function(edge) {
                         board.claimEdge(edge.point1.col, edge.point1.row, edge.point2.col, edge.point2.row, edge.color);
-                    }
+                    });
 
-                    for (var box in data.data.boxes) {
+                    data.data.boxes.forEach(function(box) {
                         board.claimSquare(box.corner.col, box.corner.row, box.color);
-                    }
+                    });
                 } else {
                     showServerResponse(data);
                 }
