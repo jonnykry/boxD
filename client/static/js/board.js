@@ -1,6 +1,7 @@
 var scale = 100;
 var Board = {
     edges: [],
+    squares: [],
     canvas : document.createElement("canvas"),
     maxRows:40,
     maxCols:40,
@@ -53,14 +54,6 @@ var Board = {
             this.context.stroke();
         }
 
-        for (var c = 0; c < this.maxCols; c++) {
-            for (var r = 0; r < this.maxRows; r++) {
-                this.context.strokeStyle= 'black';
-                this.context.beginPath();
-                this.context.arc(r * scale + scale, c * scale + scale, 10, 0, 2 * Math.PI);
-                this.context.stroke();
-            }
-        }
     },
 
     setCursor: function(x1, y1, x2, y2, color) {
@@ -77,6 +70,9 @@ var Board = {
         // If valid, render and edge and notify server via websockets
         this.edges.push(new Edge(x1, y1, x2, y2, color));
     },
+    claimSquare: function(x1, y1, color) {
+            this.squares.push(new Square(x1, y1,color));
+        },
     next_move_timer: function(current) {
         ctx = this.context;
         ctx.beginPath();
@@ -193,7 +189,10 @@ function updateBoard(timestamp) {
         Board.edges[i].update();
         Board.edges[i].mini_map_update();
     }
-
+    for (var i = 0; i < Board.squares.length; i++) {
+        Board.squares[i].update();
+        Board.squares[i].mini_map_update();
+    }
     if (Board.curX > (Board.canvas.width -100) && Board.camera.x > -3000) {
         Board.camera.x -= 10;
         Board.moveContext();
@@ -236,20 +235,65 @@ function Edge(x, y, x2, y2, color) {
     this.x2 = x2;
     this.y2 = y2;
     this.color = color;
+    if (this.x > this.x2){
+        var temp = this.x;
+        this.x = this.x2;
+        this.x2 = temp;
+    }
+    if (this.y > this.y2){
+        var temp = this.y;
+        this.y = this.y2;
+        this.y2 = temp;
+    }
     this.update = function() {
         var ctx = Board.context;
         ctx.save();
         ctx.fillStyle = this.color;
-        ctx.fillRect((this.x *scale) - 4, (this.y *scale) - 4, ((this.x2 - this.x) *scale) + 4, ((this.y2 - this.y) *scale) + 4);
+        ctx.fillRect((this.x *scale) - 2, (this.y *scale) - 2, ((this.x2 - this.x) *scale) + 4, ((this.y2 - this.y) *scale) + 4);
         ctx.restore();
     }
     this.mini_map_update = function(){
+        var hor = true;
+        if(this.x == this.x2){
+            hor = false;
+        }
         var ctx = Board.context;
+        if (hor) {
+            ctx.save();
+            ctx.translate(Board.minimap_x +this.x, Board.minimap_y +this.y);
+            ctx.fillStyle = this.color;
+            ctx.fillRect( 5 * this.x ,  5 *this.y , 5 , 1);
+            ctx.restore();
+        }
+        else {
+            ctx.save();
+            ctx.translate(Board.minimap_x +this.x, Board.minimap_y +this.y);
+            ctx.fillStyle = this.color;
+            ctx.fillRect( 5 * this.x ,  5 *this.y , 1, 5);
+            ctx.restore();
+
+        }
+
+    }
+
+}
+
+function Square(x , y , color) {
+    this.x = x;
+    this.y = y;
+    this.color = color;
+    this.update = function() {
+        var ctx = Board.context;
+        ctx.save();
+        ctx.fillStyle = this.color;
+        ctx.fillRect((this.x *scale) , (this.y *scale) , scale, scale);
+        ctx.restore();
+    }
+    this.mini_map_update = function(){
         ctx.save();
         ctx.translate(Board.minimap_x +this.x, Board.minimap_y +this.y);
         ctx.fillStyle = this.color;
-        ctx.fillRect( 5 * this.x ,  5 *this.y , (5 + (this.x2 - this.x)), (5 +(this.y2 - this.y)));
+        ctx.fillRect( 5 * this.x ,  5 *this.y , 6 , 6);
         ctx.restore();
-
     }
 }
