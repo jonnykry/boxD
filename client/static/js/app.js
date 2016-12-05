@@ -153,7 +153,6 @@ $(document).ready( function() {
                 if (data.type === 'line_claimed') {
                     console.log('A line was successfully claimed on the server.');
                     console.log(data);
-
                     // TODO: grab color from data
                     // x1, y1, x2, y2, color
                     board.claimEdge(data.data.point1.col, data.data.point1.row, data.data.point2.col, data.data.point2.row, 'blue');
