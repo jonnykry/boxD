@@ -42,12 +42,15 @@ $(document).ready( function() {
             if (s>=55){
                 carryover = s - 60;
             }
+            if (board.cooloff_timer > board.cooloff_end - 1){
+                board.move_timer=s+5 + carryover;
+                board.cooloff_timer=s;
+                board.next_move=s+15 + carryover;
+                board.cooloff_end=s+5 + carryover;
+                socket.send(JSON.stringify(request));
 
-            board.move_timer=s+5 + carryover;
-            board.cooloff_timer=s;
-            board.next_move=s+15 + carryover;
-            board.cooloff_end=s+5 + carryover;
-            socket.send(JSON.stringify(request));
+            }
+
         });
 
         board.canvas.addEventListener('mousemove', function(e) {
@@ -153,11 +156,23 @@ $(document).ready( function() {
                     console.log(data);
                     // TODO: grab color from data
                     // x1, y1, x2, y2, color
-                    game.player.color = data.data.owner;
+                    //game.player.color = data.data.owner;
                     board.claimEdge(data.data.point1.col, data.data.point1.row, data.data.point2.col, data.data.point2.row, data.data.owner);
                 } else if (data.type === 'box_created') {
                     board.claimSquare(data.data.corner.col, data.data.corner.row,data.data.owner);
                     console.log('A box was successfully created on the server.');
+
+                } else if (data.type === 'board_state') {
+                    console.log('Drawing Board');
+                    console.log(data);
+                    //game.player.color = data.data.your_color;
+                    data.data.edges.forEach(function(edge) {
+                        board.claimEdge(edge.point1.col, edge.point1.row, edge.point2.col, edge.point2.row, edge.color);
+                    });
+
+                    data.data.boxes.forEach(function(box) {
+                        board.claimSquare(box.corner.col, box.corner.row, box.color);
+                    });
                 } else {
                     showServerResponse(data);
                 }
