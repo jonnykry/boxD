@@ -17,7 +17,7 @@ class BoxdGame(object):
         self.__players = []
         self.__id_player_map = {}
         self.__scores = {}
-        self.__board = Board(50, 50)
+        self.__board = Board(20, 20)
         self.__claimed_colors = {}
         self.__scores = {}
 

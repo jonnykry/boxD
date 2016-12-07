@@ -2,9 +2,10 @@ var scale = 100;
 var Board = {
     edges: [],
     squares: [],
+    scores: [],
     canvas : document.createElement("canvas"),
-    maxRows:40,
-    maxCols:40,
+    maxRows:20,
+    maxCols:20,
     curX : 200,
     curY : 200,
     lastFrameTimeMs : 0,
@@ -32,8 +33,8 @@ var Board = {
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
         this.interval = requestAnimationFrame(updateBoard);
-        this.camera.y = - (Math.random()*10000)%3000;
-        this.camera.x = -(Math.random()*10000)%3000;
+        this.camera.y = - (Math.random()*10000)%1500;
+        this.camera.x = -(Math.random()*10000)%1500;
         this.moveContext();
         return this;
     },
@@ -140,6 +141,40 @@ var Board = {
         this.context.restore();
         this.context.globalAlpha=1;
     },
+    update_scores: function(new_score){
+        var found = false;
+        for(var i = 0; i<this.scores.length; i++){
+            if (new_score.player_name == this.scores[i].player_name){
+                this.scores[i].score = new_score.score;
+                found = true;
+            }
+
+        }
+        if (found == false) {
+            if (new_score.score !=0){
+                this.scores.push(new player_score(new_score.player_name,new_score.player_color,new_score.score));
+            }
+
+            }
+        this.scores.sort(function(a, b) { return (a.score > b.score) ? -1 : ((b.score > a.score) ? 1 : 0)});
+    },
+    draw_scoreboard: function() {
+        this.context.save();
+
+        this.context.strokeStyle = 'white';
+        this.context.font = '15pt Verdana';
+        this.context.strokeText('HighScores:', 10 -this.camera.x, 20 -this.camera.y);
+
+        for(var i = 0; i<this.scores.length; i++){
+            this.context.strokeStyle = this.scores[i].color;
+            this.context.strokeText(this.scores[i].player_name + ": "+this.scores[i].score, 10 -this.camera.x, (20 *i +40) -this.camera.y);
+            if(this.scores[i].color ==this.cursor.color) {
+                this.context.strokeText("Your Score: "+this.scores[i].score, 10 -this.camera.x, this.canvas.height-15 -this.camera.y);
+            }
+
+        }
+        this.context.restore();
+    },
     getPointsByCursor: function(mouseX, mouseY) {
             var result = {};
 
@@ -195,6 +230,7 @@ function updateBoard(timestamp) {
     Board.lastFrameTimeMs = timestamp;
     Board.clear();
     Board.mini_map_update();
+    Board.draw_scoreboard();
     for (var i = 0; i < Board.edges.length; i++) {
         Board.edges[i].update();
         Board.edges[i].mini_map_update();
@@ -206,7 +242,7 @@ function updateBoard(timestamp) {
     Board.context.globalAlpha=0.6;
     Board.cursor.update();
     Board.context.globalAlpha=1;
-    if (Board.curX > (Board.canvas.width -100) && Board.camera.x > -3000) {
+    if (Board.curX > (Board.canvas.width -100) && Board.camera.x > -1500) {
         Board.camera.x -= 10;
         Board.moveContext();
     } else if (Board.curX < 100 && Board.camera.x < 0) {
@@ -214,7 +250,7 @@ function updateBoard(timestamp) {
         Board.moveContext();
     }
 
-    if (Board.curY>(Board.canvas.height -100) && Board.camera.y > -3500){
+    if (Board.curY>(Board.canvas.height -100) && Board.camera.y > -2000){
         Board.camera.y -= 10;
         Board.moveContext();
     } else if (Board.curY < 100 && Board.camera.y < 0) {
@@ -284,14 +320,14 @@ function Edge(x, y, x2, y2, color) {
             ctx.save();
             ctx.translate(Board.minimap_x , Board.minimap_y );
             ctx.fillStyle = this.color;
-            ctx.fillRect( 5 * this.x ,  5 *this.y , 5 , 1);
+            ctx.fillRect( 5 * this.x ,  5 *this.y , 10 , 1);
             ctx.restore();
         }
         else {
             ctx.save();
             ctx.translate(Board.minimap_x , Board.minimap_y );
             ctx.fillStyle = this.color;
-            ctx.fillRect( 5 * this.x ,  5 *this.y , 1, 5);
+            ctx.fillRect( 5 * this.x ,  5 *this.y , 1, 10);
             ctx.restore();
 
         }
@@ -315,7 +351,14 @@ function Square(x , y , color) {
         ctx.save();
         ctx.translate(Board.minimap_x , Board.minimap_y );
         ctx.fillStyle = this.color;
-        ctx.fillRect( 5 * this.x ,  5 *this.y , 6 , 6);
+        ctx.fillRect( 5 * this.x ,  5 *this.y , 11 , 11);
         ctx.restore();
     }
+}
+
+function player_score(player_name,color,score){
+    this.player_name=player_name;
+    this.color=color;
+    this.score=score;
+
 }
