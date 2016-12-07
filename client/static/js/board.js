@@ -2,6 +2,7 @@ var scale = 100;
 var Board = {
     edges: [],
     squares: [],
+    scores: [],
     canvas : document.createElement("canvas"),
     maxRows:40,
     maxCols:40,
@@ -140,6 +141,33 @@ var Board = {
         this.context.restore();
         this.context.globalAlpha=1;
     },
+    update_scores: function(new_score){
+        var found = false;
+        for(var i = 0; i<this.scores.length; i++){
+            if (new_score.player_name = scores[i].player_name){
+                scores[i].score = new_score.score;
+                found = true;
+            }
+
+        }
+        if (found == false) {
+            this.scores.push(new player_score(new_score.player_name,new_score.color,new_score.score))
+            }
+
+    },
+    draw_scoreboard: function() {
+        this.context.save();
+
+        this.context.strokeStyle = 'white';
+        this.context.font = '10pt Verdana';
+        this.context.strokeText('HighScores:', 50 -this.camera.x, 10 -this.camera.y);
+
+        for(var i = 0; i<this.scores.length; i++){
+            this.context.strokeStyle = scores[i].color;
+            this.context.strokeText(scores[i].score, 50 -this.camera.x, (10 *i +10) -this.camera.y);
+        }
+        this.context.restore();
+    },
     getPointsByCursor: function(mouseX, mouseY) {
             var result = {};
 
@@ -195,6 +223,7 @@ function updateBoard(timestamp) {
     Board.lastFrameTimeMs = timestamp;
     Board.clear();
     Board.mini_map_update();
+    Board.draw_scoreboard();
     for (var i = 0; i < Board.edges.length; i++) {
         Board.edges[i].update();
         Board.edges[i].mini_map_update();
@@ -318,4 +347,11 @@ function Square(x , y , color) {
         ctx.fillRect( 5 * this.x ,  5 *this.y , 6 , 6);
         ctx.restore();
     }
+}
+
+function player_score(player_name,color,score){
+    this.player_name=player_name;
+    this.color=color;
+    this.score=score;
+
 }

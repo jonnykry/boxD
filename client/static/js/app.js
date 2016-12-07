@@ -170,7 +170,12 @@ $(document).ready( function() {
                     data.data.boxes.forEach(function(box) {
                         board.claimSquare(box.corner.col, box.corner.row, box.color);
                     });
-                } else {
+                } else if (data.type === 'score_update') {
+                    console.log('Updating Score);
+                    console.log(data);
+                    Board.update_scores(data);
+
+                }else {
                     showServerResponse(data);
                 }
             };
