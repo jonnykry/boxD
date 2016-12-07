@@ -19,6 +19,7 @@ class BoxdGame(object):
         self.__scores = {}
         self.__board = Board(50, 50)
         self.__claimed_colors = {}
+        self.__scores = {}
 
         for color_str in BoxdGame.__COLOR_OPTIONS:
             self.__claimed_colors[color_str] = None
@@ -31,6 +32,7 @@ class BoxdGame(object):
         player_color = self.__get_unclaimed_color()
         self.__claimed_colors[player_color] = player_id
         self.__players.append(player_id)
+        self.__scores[player_id] = 0
         self.__id_player_map[player_id] = Player(player_id, nickname, player_color)
 
     '''
@@ -60,12 +62,24 @@ class BoxdGame(object):
         self.__players.remove(player_id)            # remove player id from list of player ids
         self.__claimed_colors[player.color] = None  # set the color option to 'unclaimed'
         self.__id_player_map.pop(player_id)         # remove the player object from the player map
+        self.__scores.pop(player_id)
 
         # for now, leave all lines owned by player_id.  Those can stay
         return to_void
 
     def get_players(self):
         return self.__players
+
+    def get_player_score(self, player_id):
+        return self.__scores[player_id]
+
+    def get_scores(self):
+        scores = []
+
+        for player_id, score in self.__scores.iteritems():
+            scores.append((self.get_player_color(player_id), self.get_player_name(player_id), score))
+
+        return scores
 
     def get_edges(self):
         return self.__board.get_edges()
@@ -86,6 +100,15 @@ class BoxdGame(object):
             player_color = self.get_player_color(player_id)
             self.__id_player_map[player_id].next_move = current_time + timedelta(seconds=COOLDOWN_SECONDS)
             new_boxes = self.__board.claim_edge(pt1, pt2, player_color)
+
+            added_score = 0
+            if len(new_boxes) == 1:
+                added_score = 10
+            elif len(new_boxes) == 2:
+                added_score = 30
+
+            self.__scores[player_id] += added_score
+
             return new_boxes
 
         except ValueError:
