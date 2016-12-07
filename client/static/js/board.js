@@ -12,7 +12,8 @@ var Board = {
     move_timer: 0,
     next_move: 10,
     cooloff_timer: 0,
-    cooloff_end: 0,
+    last_second:0,
+    cooloff_end: 5,
     minimap_x : 0,
     minimap_y : 0,
     cursor: new Edge(0, 0, 0, 0, 'yellow'),
@@ -218,23 +219,29 @@ function updateBoard(timestamp) {
     }
     var d = new Date();
     var s = d.getSeconds();
-    Board.cool_off_timer((Board.cooloff_timer - (Board.cooloff_end - 5))/5);
-    Board.next_move_timer((Board.move_timer - (Board.next_move - 10))/10);
-    Board.cooloff_timer+= (s - Board.cooloff_timer);
+    Board.cool_off_timer((Board.cooloff_timer )/5);
+    Board.next_move_timer((Board.move_timer )/10);
+    if(Board.last_second != s){
+        Board.cooloff_timer+= 1;
 
-    if( Board.cooloff_timer >= Board.cooloff_end){
-        Board.move_timer+=(s - Board.move_timer)
-        if (Board.move_timer >=Board.next_move){
-            var carryover = 0;
-            if (s>=55){
-                carryover = s - 60;
+        if( Board.cooloff_timer >= Board.cooloff_end){
+            Board.move_timer+=1;
+
+            if (Board.move_timer >=Board.next_move){
+                Board.cooloff_timer = 0 ;
+                Board.move_timer =  0;
+                Board.next_move = 10;
+                Board.cooloff_end= 5;
             }
-            Board.cooloff_timer = s ;
-            Board.move_timer =  s+ 5 + carryover;
-            Board.next_move = s + 15 + carryover;
-            Board.cooloff_end= s+5+carryover;
+         }
+        Board.last_second=s;
+        if (Board.last_second ==60){
+            Board.last_second =0;
         }
     }
+
+
+
 
 
     requestAnimationFrame(updateBoard);
@@ -302,7 +309,7 @@ function Square(x , y , color) {
     }
     this.mini_map_update = function(){
         ctx.save();
-        ctx.translate(Board.minimap_x +this.x, Board.minimap_y +this.y);
+        ctx.translate(Board.minimap_x , Board.minimap_y );
         ctx.fillStyle = this.color;
         ctx.fillRect( 5 * this.x ,  5 *this.y , 6 , 6);
         ctx.restore();

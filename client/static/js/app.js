@@ -15,39 +15,30 @@ $(document).ready( function() {
             var mouseY = e.pageY;
             mouseX -= board.camera.x;
             mouseY -= board.camera.y;
-
-            if(mouseX > scale && mouseY > scale && mouseX < board.maxCols * scale && mouseY < board.maxCols * scale ){
-
-                var points = board.getPointsByCursor(mouseX, mouseY);
-
-                console.log(points.pointX, points.pointY, points.pointX2, points.pointY2);
-
-                // TODO:  If the edge is valid, let's do it
-                // Note:  Pass as (y, x) since backend uses (r, c)
-                var request = {
-                   type:  'CLAIM_LINE',
-                   data: {
-                       pt1_r: points.pointY,
-                       pt1_c: points.pointX,
-                       pt2_r: points.pointY2,
-                       pt2_c: points.pointX2
-                   }
-                };
-            }
-            //if it passes update cooloff timer
-            var d = new Date();
-            var s = d.getSeconds();
-            console.log(s);
-            var carryover = 0;
-            if (s>=55){
-                carryover = s - 60;
-            }
             if (board.cooloff_timer > board.cooloff_end - 1){
-                board.move_timer=s+5 + carryover;
-                board.cooloff_timer=s;
-                board.next_move=s+15 + carryover;
-                board.cooloff_end=s+5 + carryover;
-                socket.send(JSON.stringify(request));
+                if(mouseX > scale && mouseY > scale && mouseX < board.maxCols * scale && mouseY < board.maxCols * scale ){
+
+                    var points = board.getPointsByCursor(mouseX, mouseY);
+
+                    console.log(points.pointX, points.pointY, points.pointX2, points.pointY2);
+
+                    // TODO:  If the edge is valid, let's do it
+                    // Note:  Pass as (y, x) since backend uses (r, c)
+                    var request = {
+                       type:  'CLAIM_LINE',
+                       data: {
+                           pt1_r: points.pointY,
+                           pt1_c: points.pointX,
+                           pt2_r: points.pointY2,
+                           pt2_c: points.pointX2
+                       }
+                    };
+                }
+            //if it passes update cooloff timer
+             Board.cooloff_timer = 0 ;
+             Board.move_timer =  0;
+             Board.next_move = 10;
+             Board.cooloff_end= 5;
 
             }
 
