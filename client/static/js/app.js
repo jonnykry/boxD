@@ -5,8 +5,7 @@ $(document).ready( function() {
         alert('Your browser does not support web sockets');
     } else {
         var socket = setup();
-        // TODO: Generate player based on `JOIN_GAME` response
-        var player = Player.init("Jonny", "blue");
+        var player = Player.init();
         var game = Game.init(player);
         var board = game.board;
 
@@ -145,7 +144,6 @@ $(document).ready( function() {
                 if (data.type === 'line_claimed') {
                     console.log('A line was successfully claimed on the server.');
                     console.log(data);
-                    // TODO: grab color from data
                     // x1, y1, x2, y2, color
                     //game.player.color = data.data.owner;
                     board.claimEdge(data.data.point1.col, data.data.point1.row, data.data.point2.col, data.data.point2.row, data.data.owner);
@@ -158,11 +156,11 @@ $(document).ready( function() {
                         Board.cooloff_end= 5;
                     }
                     console.log('A box was successfully created on the server.');
-
                 } else if (data.type === 'board_state') {
                     console.log('Drawing Board');
                     console.log(data);
                     game.player.color = data.data.your_color;
+
                     data.data.edges.forEach(function(edge) {
                         board.claimEdge(edge.point1.col, edge.point1.row, edge.point2.col, edge.point2.row, edge.color);
                     });
