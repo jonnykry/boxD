@@ -32,13 +32,14 @@ $(document).ready( function() {
                            pt2_c: points.pointX2
                        }
                     };
+
+                //if it passes update cooloff timer
+                Board.cooloff_timer = 0 ;
+                Board.move_timer =  0;
+                Board.next_move = 10;
+                Board.cooloff_end= 5;
+                socket.send(JSON.stringify(request));
                 }
-            //if it passes update cooloff timer
-            Board.cooloff_timer = 0 ;
-            Board.move_timer =  0;
-            Board.next_move = 10;
-            Board.cooloff_end= 5;
-            socket.send(JSON.stringify(request));
             }
 
         });
