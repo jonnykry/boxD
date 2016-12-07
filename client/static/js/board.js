@@ -12,7 +12,8 @@ var Board = {
     move_timer: 0,
     next_move: 10,
     cooloff_timer: 0,
-    cooloff_end: 0,
+    last_second:0,
+    cooloff_end: 5,
     minimap_x : 0,
     minimap_y : 0,
     cursor: new Edge(0, 0, 0, 0, 'yellow'),
@@ -31,7 +32,9 @@ var Board = {
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
         this.interval = requestAnimationFrame(updateBoard);
-
+        this.camera.y = - (Math.random()*10000)%3000;
+        this.camera.x = -(Math.random()*10000)%3000;
+        this.moveContext();
         return this;
     },
 
@@ -87,7 +90,7 @@ var Board = {
 
         ctx.lineCap = 'square';
         ctx.lineWidth = 10.0;
-        ctx.arc(120 -this.camera.x, 120-this.camera.y, 70, -(Math.PI / 2), (( Math.PI * 2)) , false);
+        ctx.arc(120 -this.camera.x, this.canvas.height - 120-this.camera.y, 70, -(Math.PI / 2), (( Math.PI * 2)) , false);
         ctx.stroke();
         ctx.restore();
 
@@ -97,7 +100,7 @@ var Board = {
             ctx.strokeStyle = '#ffffff';
             ctx.lineCap = 'square';
             ctx.lineWidth = 10.0;
-            ctx.arc(120 -this.camera.x, 120-this.camera.y, 70, -(Math.PI / 2), (( Math.PI * 2) * current) - Math.PI / 2, false);
+            ctx.arc(120 -this.camera.x, this.canvas.height - 120-this.camera.y, 70, -(Math.PI / 2), (( Math.PI * 2) * current) - Math.PI / 2, false);
             ctx.stroke();
             ctx.restore();
         }
@@ -109,7 +112,7 @@ var Board = {
         ctx.save();
         ctx.strokeStyle = '#ff0000';
         ctx.lineWidth = 75.0;
-        ctx.arc(120 -this.camera.x, 120-this.camera.y, 35, -(Math.PI / 2), (( Math.PI * 2)) - Math.PI / 2, false);
+        ctx.arc(120 -this.camera.x, this.canvas.height - 120-this.camera.y, 35, -(Math.PI / 2), (( Math.PI * 2)) - Math.PI / 2, false);
         ctx.stroke();
         ctx.restore();
 
@@ -117,17 +120,25 @@ var Board = {
         ctx.save();
         ctx.strokeStyle = '#0066ff';
         ctx.lineWidth = 75.0;
-        ctx.arc(120 -this.camera.x, 120-this.camera.y, 35, -(Math.PI / 2), (( Math.PI * 2) * current) - Math.PI / 2, false);
+        ctx.arc(120 -this.camera.x, this.canvas.height - 120-this.camera.y, 35, -(Math.PI / 2), (( Math.PI * 2) * current) - Math.PI / 2, false);
         ctx.stroke();
         ctx.restore();
     },
     mini_map_update: function() {
+        this.context.globalAlpha=0.6;
         this.minimap_x = -this.camera.x+this.canvas.width - 200;
         this.minimap_y = -this.camera.y+this.canvas.height - 200;
         this.context.fillStyle = 'black';
-        this.context.fillRect(this.minimap_x - 5,this.minimap_y -5 , 200 , 200);
+        this.context.fillRect(this.minimap_x - 5,this.minimap_y -5 , 210 , 210);
         this.context.fillStyle = '#525252';
         this.context.fillRect(this.minimap_x,this.minimap_y , 200 , 200);
+        this.context.beginPath();
+        this.context.save();
+        this.context.strokeStyle = 'black';
+        this.context.rect(this.minimap_x + ( -this.camera.x /20),this.minimap_y +( -this.camera.y /20) , this.canvas.width / 20, this.canvas.height /20);
+        this.context.stroke();
+        this.context.restore();
+        this.context.globalAlpha=1;
     },
     getPointsByCursor: function(mouseX, mouseY) {
             var result = {};
@@ -183,7 +194,6 @@ function updateBoard(timestamp) {
 
     Board.lastFrameTimeMs = timestamp;
     Board.clear();
-    Board.cursor.update();
     Board.mini_map_update();
     for (var i = 0; i < Board.edges.length; i++) {
         Board.edges[i].update();
@@ -193,6 +203,9 @@ function updateBoard(timestamp) {
         Board.squares[i].update();
         Board.squares[i].mini_map_update();
     }
+    Board.context.globalAlpha=0.6;
+    Board.cursor.update();
+    Board.context.globalAlpha=1;
     if (Board.curX > (Board.canvas.width -100) && Board.camera.x > -3000) {
         Board.camera.x -= 10;
         Board.moveContext();
@@ -201,7 +214,7 @@ function updateBoard(timestamp) {
         Board.moveContext();
     }
 
-    if (Board.curY>(Board.canvas.height -100) && Board.camera.y > -3000){
+    if (Board.curY>(Board.canvas.height -100) && Board.camera.y > -3500){
         Board.camera.y -= 10;
         Board.moveContext();
     } else if (Board.curY < 100 && Board.camera.y < 0) {
@@ -209,21 +222,30 @@ function updateBoard(timestamp) {
         Board.moveContext();
     }
     var d = new Date();
-    Board.cool_off_timer((Board.cooloff_timer - (Board.cooloff_end - 5))/5);
-    Board.next_move_timer((Board.move_timer - (Board.next_move - 10))/10);
-    Board.cooloff_timer+= (d.getSeconds() - Board.cooloff_timer);
+    var s = d.getSeconds();
+    Board.cool_off_timer((Board.cooloff_timer )/5);
+    Board.next_move_timer((Board.move_timer )/10);
+    if(Board.last_second != s){
+        Board.cooloff_timer+= 1;
 
-    if( Board.cooloff_timer >= Board.cooloff_end){
-        Board.move_timer+=(d.getSeconds() - Board.move_timer)
-        if (Board.move_timer >=Board.next_move){
-            var carryover = 0;
-            if (d.getSeconds()>=45){
-                carryover = d.getSeconds() - 60;
+        if( Board.cooloff_timer >= Board.cooloff_end){
+            Board.move_timer+=1;
+
+            if (Board.move_timer >=Board.next_move){
+                Board.cooloff_timer = 0 ;
+                Board.move_timer =  0;
+                Board.next_move = 10;
+                Board.cooloff_end= 5;
             }
-            Board.next_move = Board.move_timer + 15 + carryover;
-            Board.cooloff_end= Board.cooloff_timer+5+carryover;
+         }
+        Board.last_second=s;
+        if (Board.last_second ==60){
+            Board.last_second =0;
         }
     }
+
+
+
 
 
     requestAnimationFrame(updateBoard);
@@ -260,14 +282,14 @@ function Edge(x, y, x2, y2, color) {
         var ctx = Board.context;
         if (hor) {
             ctx.save();
-            ctx.translate(Board.minimap_x +this.x, Board.minimap_y +this.y);
+            ctx.translate(Board.minimap_x , Board.minimap_y );
             ctx.fillStyle = this.color;
             ctx.fillRect( 5 * this.x ,  5 *this.y , 5 , 1);
             ctx.restore();
         }
         else {
             ctx.save();
-            ctx.translate(Board.minimap_x +this.x, Board.minimap_y +this.y);
+            ctx.translate(Board.minimap_x , Board.minimap_y );
             ctx.fillStyle = this.color;
             ctx.fillRect( 5 * this.x ,  5 *this.y , 1, 5);
             ctx.restore();
@@ -291,7 +313,7 @@ function Square(x , y , color) {
     }
     this.mini_map_update = function(){
         ctx.save();
-        ctx.translate(Board.minimap_x +this.x, Board.minimap_y +this.y);
+        ctx.translate(Board.minimap_x , Board.minimap_y );
         ctx.fillStyle = this.color;
         ctx.fillRect( 5 * this.x ,  5 *this.y , 6 , 6);
         ctx.restore();

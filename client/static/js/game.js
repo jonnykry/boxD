@@ -6,7 +6,6 @@ var Game = {
     init: function(player) {
         this.board = Board.init();
         this.player = player;
-
         return this;
     }
 };
