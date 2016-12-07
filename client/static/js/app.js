@@ -35,11 +35,11 @@ $(document).ready( function() {
                     };
                 }
             //if it passes update cooloff timer
-             Board.cooloff_timer = 0 ;
-             Board.move_timer =  0;
-             Board.next_move = 10;
-             Board.cooloff_end= 5;
-
+            Board.cooloff_timer = 0 ;
+            Board.move_timer =  0;
+            Board.next_move = 10;
+            Board.cooloff_end= 5;
+            socket.send(JSON.stringify(request));
             }
 
         });

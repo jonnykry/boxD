@@ -278,14 +278,14 @@ function Edge(x, y, x2, y2, color) {
         var ctx = Board.context;
         if (hor) {
             ctx.save();
-            ctx.translate(Board.minimap_x +this.x, Board.minimap_y +this.y);
+            ctx.translate(Board.minimap_x , Board.minimap_y );
             ctx.fillStyle = this.color;
             ctx.fillRect( 5 * this.x ,  5 *this.y , 5 , 1);
             ctx.restore();
         }
         else {
             ctx.save();
-            ctx.translate(Board.minimap_x +this.x, Board.minimap_y +this.y);
+            ctx.translate(Board.minimap_x , Board.minimap_y );
             ctx.fillStyle = this.color;
             ctx.fillRect( 5 * this.x ,  5 *this.y , 1, 5);
             ctx.restore();
