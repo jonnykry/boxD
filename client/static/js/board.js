@@ -34,7 +34,7 @@ var Board = {
         this.frameNo = 0;
         this.interval = requestAnimationFrame(updateBoard);
         this.camera.y = - (Math.random()*10000)%1500;
-        this.camera.x = -(Math.random()*10000)%1500;
+        this.camera.x = -(Math.random()*10000)%1000;
         this.moveContext();
         return this;
     },
@@ -136,7 +136,7 @@ var Board = {
         this.context.beginPath();
         this.context.save();
         this.context.strokeStyle = 'black';
-        this.context.rect(this.minimap_x + ( -this.camera.x /20),this.minimap_y +( -this.camera.y /20) , this.canvas.width / 20, this.canvas.height /20);
+        this.context.rect(this.minimap_x + ( -this.camera.x /10),this.minimap_y +( -this.camera.y /10) , this.canvas.width / 10, this.canvas.height /10);
         this.context.stroke();
         this.context.restore();
         this.context.globalAlpha=1;
@@ -159,8 +159,12 @@ var Board = {
         this.scores.sort(function(a, b) { return (a.score > b.score) ? -1 : ((b.score > a.score) ? 1 : 0)});
     },
     draw_scoreboard: function() {
-        this.context.save();
 
+        this.context.globalAlpha=0.4;
+        this.context.fillStyle = 'black';
+        this.context.fillRect(0 -this.camera.x,0-this.camera.y, 250 , 40 + this.scores.length * 20);
+        this.context.globalAlpha=1;
+        this.context.save();
         this.context.strokeStyle = 'white';
         this.context.font = '15pt Verdana';
         this.context.strokeText('HighScores:', 10 -this.camera.x, 20 -this.camera.y);
@@ -230,7 +234,7 @@ function updateBoard(timestamp) {
     Board.lastFrameTimeMs = timestamp;
     Board.clear();
     Board.mini_map_update();
-    Board.draw_scoreboard();
+
     for (var i = 0; i < Board.edges.length; i++) {
         Board.edges[i].update();
         Board.edges[i].mini_map_update();
@@ -242,7 +246,7 @@ function updateBoard(timestamp) {
     Board.context.globalAlpha=0.6;
     Board.cursor.update();
     Board.context.globalAlpha=1;
-    if (Board.curX > (Board.canvas.width -100) && Board.camera.x > -1500) {
+    if (Board.curX > (Board.canvas.width -100) && Board.camera.x > -700) {
         Board.camera.x -= 10;
         Board.moveContext();
     } else if (Board.curX < 100 && Board.camera.x < 0) {
@@ -250,13 +254,14 @@ function updateBoard(timestamp) {
         Board.moveContext();
     }
 
-    if (Board.curY>(Board.canvas.height -100) && Board.camera.y > -2000){
+    if (Board.curY>(Board.canvas.height -100) && Board.camera.y > -1300){
         Board.camera.y -= 10;
         Board.moveContext();
     } else if (Board.curY < 100 && Board.camera.y < 0) {
         Board.camera.y += 10;
         Board.moveContext();
     }
+    Board.draw_scoreboard();
     var d = new Date();
     var s = d.getSeconds();
     Board.cool_off_timer((Board.cooloff_timer )/5);
@@ -320,14 +325,14 @@ function Edge(x, y, x2, y2, color) {
             ctx.save();
             ctx.translate(Board.minimap_x , Board.minimap_y );
             ctx.fillStyle = this.color;
-            ctx.fillRect( 5 * this.x ,  5 *this.y , 10 , 1);
+            ctx.fillRect( 10 * this.x ,  10 *this.y , 10 , 1);
             ctx.restore();
         }
         else {
             ctx.save();
             ctx.translate(Board.minimap_x , Board.minimap_y );
             ctx.fillStyle = this.color;
-            ctx.fillRect( 5 * this.x ,  5 *this.y , 1, 10);
+            ctx.fillRect( 10 * this.x ,  10 *this.y , 1, 10);
             ctx.restore();
 
         }
@@ -351,7 +356,7 @@ function Square(x , y , color) {
         ctx.save();
         ctx.translate(Board.minimap_x , Board.minimap_y );
         ctx.fillStyle = this.color;
-        ctx.fillRect( 5 * this.x ,  5 *this.y , 11 , 11);
+        ctx.fillRect( 10 * this.x ,  10 *this.y , 11 , 11);
         ctx.restore();
     }
 }
