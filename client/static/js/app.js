@@ -5,8 +5,7 @@ $(document).ready( function() {
         alert('Your browser does not support web sockets');
     } else {
         var socket = setup();
-        // TODO: Generate player based on `JOIN_GAME` response
-        var player = Player.init("Jonny", "blue");
+        var player = Player.init();
         var game = Game.init(player);
         var board = game.board;
 

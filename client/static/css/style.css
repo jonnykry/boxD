@@ -5,9 +5,19 @@ html, body{
   height: 100%;
   overflow:hidden;
 }
+
 .canvas {
  display:block;
 }
+
+#entryModalTitle {
+    text-align: center;
+}
+
+.modal-body {
+    padding: 1.5rem!important;
+}
+
 .game {
   min-width: 100%;
   min-height: 100%;
