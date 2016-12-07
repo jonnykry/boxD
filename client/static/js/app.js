@@ -15,39 +15,33 @@ $(document).ready( function() {
             var mouseY = e.pageY;
             mouseX -= board.camera.x;
             mouseY -= board.camera.y;
+            if (board.cooloff_timer > board.cooloff_end - 1){
+                if(mouseX > scale && mouseY > scale && mouseX < board.maxCols * scale && mouseY < board.maxCols * scale ){
 
-            if(mouseX > scale && mouseY > scale && mouseX < board.maxCols * scale && mouseY < board.maxCols * scale ){
+                    var points = board.getPointsByCursor(mouseX, mouseY);
 
-                var points = board.getPointsByCursor(mouseX, mouseY);
+                    console.log(points.pointX, points.pointY, points.pointX2, points.pointY2);
 
-                console.log(points.pointX, points.pointY, points.pointX2, points.pointY2);
-
-                // TODO:  If the edge is valid, let's do it
-                // Note:  Pass as (y, x) since backend uses (r, c)
-                var request = {
-                   type:  'CLAIM_LINE',
-                   data: {
-                       pt1_r: points.pointY,
-                       pt1_c: points.pointX,
-                       pt2_r: points.pointY2,
-                       pt2_c: points.pointX2
-                   }
-                };
-            }
+                    // TODO:  If the edge is valid, let's do it
+                    // Note:  Pass as (y, x) since backend uses (r, c)
+                    var request = {
+                       type:  'CLAIM_LINE',
+                       data: {
+                           pt1_r: points.pointY,
+                           pt1_c: points.pointX,
+                           pt2_r: points.pointY2,
+                           pt2_c: points.pointX2
+                       }
+                    };
+                }
             //if it passes update cooloff timer
-            var d = new Date();
-            var s = d.getSeconds();
-            console.log(s);
-            var carryover = 0;
-            if (s>=55){
-                carryover = s - 60;
+            Board.cooloff_timer = 0 ;
+            Board.move_timer =  0;
+            Board.next_move = 10;
+            Board.cooloff_end= 5;
+            socket.send(JSON.stringify(request));
             }
 
-            board.move_timer=s+5 + carryover;
-            board.cooloff_timer=s;
-            board.next_move=s+15 + carryover;
-            board.cooloff_end=s+5 + carryover;
-            socket.send(JSON.stringify(request));
         });
 
         board.canvas.addEventListener('mousemove', function(e) {
@@ -152,12 +146,22 @@ $(document).ready( function() {
                     console.log('A line was successfully claimed on the server.');
                     console.log(data);
                     // x1, y1, x2, y2, color
-                    game.player.color = data.data.owner;
+                    //game.player.color = data.data.owner;
                     board.claimEdge(data.data.point1.col, data.data.point1.row, data.data.point2.col, data.data.point2.row, data.data.owner);
                 } else if (data.type === 'box_created') {
                     board.claimSquare(data.data.corner.col, data.data.corner.row,data.data.owner);
+                    if(data.data.owner == game.player.color){
+                        Board.cooloff_timer = 5 ;
+                        Board.move_timer =  0;
+                        Board.next_move = 10;
+                        Board.cooloff_end= 5;
+                    }
                     console.log('A box was successfully created on the server.');
                 } else if (data.type === 'board_state') {
+                    console.log('Drawing Board');
+                    console.log(data);
+                    game.player.color = data.data.your_color;
+
                     data.data.edges.forEach(function(edge) {
                         board.claimEdge(edge.point1.col, edge.point1.row, edge.point2.col, edge.point2.row, edge.color);
                     });

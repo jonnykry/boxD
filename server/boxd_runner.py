@@ -158,7 +158,6 @@ class GameRunner(object):
 
             return self.client_game_map[client_id].get_player_color(client_id)
 
-
         def get_board_info(self, client_id):
 
             if client_id not in self.client_game_map:
@@ -166,8 +165,15 @@ class GameRunner(object):
 
             edges = self.client_game_map[client_id].get_edges()
             boxes = self.client_game_map[client_id].get_boxes()
+            scores = self.client_game_map[client_id].get_scores()
 
-            return edges, boxes
+            return edges, boxes, scores
+
+        def get_player_score(self, client_id):
+            return self.client_game_map[client_id].get_player_score(client_id)
+
+        def get_game_scores(self, client_id):
+            return self.client_game_map[client_id].get_scores()
 
     @staticmethod
     def claim_line(client_id, pt1, pt2):
@@ -218,6 +224,14 @@ class GameRunner(object):
     @staticmethod
     def get_player_name(client_id):
         return GameRunner.__instance.get_player_name(client_id)
+
+    @staticmethod
+    def get_player_score(client_id):
+        return GameRunner.__instance.get_player_score(client_id)
+
+    @staticmethod
+    def get_game_scores(client_id):
+        return GameRunner.__instance.get_game_scores(client_id)
 
     @staticmethod
     def create():

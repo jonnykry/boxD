@@ -63,11 +63,26 @@ class NameChangedMessage(Message):
         super(NameChangedMessage, self).__init__(msg)
 
 
+class ScoreUpdateMessage(Message):
+    def __init__(self, color, name, score):
+        data_map = {
+            'player_color': color,
+            'player_name': name,
+            'score': score
+        }
+        msg = {
+            'type': 'score_update',
+            'data': data_map
+        }
+        super(ScoreUpdateMessage, self).__init__(msg)
+
+
 class BoardStateMessage(Message):
-    def __init__(self, edges, boxes):
+    def __init__(self, edges, boxes, scores, client_color):
 
         edge_data = []
         box_data = []
+        score_data = []
 
         for edge_tuple in edges:
             point1 = edge_tuple[0]
@@ -99,11 +114,24 @@ class BoardStateMessage(Message):
             }
             box_data.append(data_map)
 
+        for score_tuple in scores:
+            score_owner_color = score_tuple[0]
+            score_owner_name = score_tuple[1]
+            score = score_tuple[2]
+            data_map = {
+                'player_color': score_owner_color,
+                'player_name': score_owner_name,
+                'score': score
+            }
+            score_data.append(data_map)
+
         msg = {
             'type': 'board_state',
             'data': {
+                'your_color': client_color,
                 'edges': edge_data,
-                'boxes': box_data
+                'boxes': box_data,
+                'scores': score_data
             }
         }
         super(BoardStateMessage, self).__init__(msg)
