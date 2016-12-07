@@ -151,12 +151,18 @@ $(document).ready( function() {
                     board.claimEdge(data.data.point1.col, data.data.point1.row, data.data.point2.col, data.data.point2.row, data.data.owner);
                 } else if (data.type === 'box_created') {
                     board.claimSquare(data.data.corner.col, data.data.corner.row,data.data.owner);
+                    if(data.data.owner == game.player.color){
+                        Board.cooloff_timer = 5 ;
+                        Board.move_timer =  0;
+                        Board.next_move = 10;
+                        Board.cooloff_end= 5;
+                    }
                     console.log('A box was successfully created on the server.');
 
                 } else if (data.type === 'board_state') {
                     console.log('Drawing Board');
                     console.log(data);
-                    //game.player.color = data.data.your_color;
+                    game.player.color = data.data.your_color;
                     data.data.edges.forEach(function(edge) {
                         board.claimEdge(edge.point1.col, edge.point1.row, edge.point2.col, edge.point2.row, edge.color);
                     });

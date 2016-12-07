@@ -90,7 +90,7 @@ var Board = {
 
         ctx.lineCap = 'square';
         ctx.lineWidth = 10.0;
-        ctx.arc(120 -this.camera.x, 120-this.camera.y, 70, -(Math.PI / 2), (( Math.PI * 2)) , false);
+        ctx.arc(120 -this.camera.x, this.canvas.height - 120-this.camera.y, 70, -(Math.PI / 2), (( Math.PI * 2)) , false);
         ctx.stroke();
         ctx.restore();
 
@@ -100,7 +100,7 @@ var Board = {
             ctx.strokeStyle = '#ffffff';
             ctx.lineCap = 'square';
             ctx.lineWidth = 10.0;
-            ctx.arc(120 -this.camera.x, 120-this.camera.y, 70, -(Math.PI / 2), (( Math.PI * 2) * current) - Math.PI / 2, false);
+            ctx.arc(120 -this.camera.x, this.canvas.height - 120-this.camera.y, 70, -(Math.PI / 2), (( Math.PI * 2) * current) - Math.PI / 2, false);
             ctx.stroke();
             ctx.restore();
         }
@@ -112,7 +112,7 @@ var Board = {
         ctx.save();
         ctx.strokeStyle = '#ff0000';
         ctx.lineWidth = 75.0;
-        ctx.arc(120 -this.camera.x, 120-this.camera.y, 35, -(Math.PI / 2), (( Math.PI * 2)) - Math.PI / 2, false);
+        ctx.arc(120 -this.camera.x, this.canvas.height - 120-this.camera.y, 35, -(Math.PI / 2), (( Math.PI * 2)) - Math.PI / 2, false);
         ctx.stroke();
         ctx.restore();
 
@@ -120,11 +120,12 @@ var Board = {
         ctx.save();
         ctx.strokeStyle = '#0066ff';
         ctx.lineWidth = 75.0;
-        ctx.arc(120 -this.camera.x, 120-this.camera.y, 35, -(Math.PI / 2), (( Math.PI * 2) * current) - Math.PI / 2, false);
+        ctx.arc(120 -this.camera.x, this.canvas.height - 120-this.camera.y, 35, -(Math.PI / 2), (( Math.PI * 2) * current) - Math.PI / 2, false);
         ctx.stroke();
         ctx.restore();
     },
     mini_map_update: function() {
+        this.context.globalAlpha=0.6;
         this.minimap_x = -this.camera.x+this.canvas.width - 200;
         this.minimap_y = -this.camera.y+this.canvas.height - 200;
         this.context.fillStyle = 'black';
@@ -137,6 +138,7 @@ var Board = {
         this.context.rect(this.minimap_x + ( -this.camera.x /20),this.minimap_y +( -this.camera.y /20) , this.canvas.width / 20, this.canvas.height /20);
         this.context.stroke();
         this.context.restore();
+        this.context.globalAlpha=1;
     },
     getPointsByCursor: function(mouseX, mouseY) {
             var result = {};
@@ -201,7 +203,9 @@ function updateBoard(timestamp) {
         Board.squares[i].update();
         Board.squares[i].mini_map_update();
     }
+    Board.context.globalAlpha=0.6;
     Board.cursor.update();
+    Board.context.globalAlpha=1;
     if (Board.curX > (Board.canvas.width -100) && Board.camera.x > -3000) {
         Board.camera.x -= 10;
         Board.moveContext();
