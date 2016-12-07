@@ -133,18 +133,17 @@ class SocketConnection(tornado.websocket.WebSocketHandler):
                 name = message['data']['name'] or 'Unnamed Player'
 
                 assigned_game = GameRunner.assign_player(self.client_id, name)
+                client_color = GameRunner.get_player_color(self.client_id)
                 board_edges, board_boxes = GameRunner.get_board_info(self.client_id)
 
                 ConnectionManager.send_message(self.client_id, "You joined game {} as {}".format(assigned_game, name))
                 ConnectionManager.send_message(self.client_id, "The game has the following players:  {}"
-                                               .format(GameRunner().get_other_player_ids(self.client_id)))  # TODO:  Send player scores and board state
+                                               .format(GameRunner().get_other_player_ids(self.client_id)))
                 ConnectionManager.send_to_all(GameRunner.get_other_player_ids(self.client_id),
                                               "{} (client {}) joined the game".format(name, self.client_id))
 
-                # generate and send message about the board state
-                ConnectionManager.send_message(self.client_id, json.dumps(messages.BoardStateMessage(board_edges, board_boxes).get_message()))
-
-
+                # generate and send message about the board state # TODO:  Send player scores
+                ConnectionManager.send_message(self.client_id, json.dumps(messages.BoardStateMessage(board_edges, board_boxes, client_color).get_message()))
 
             elif message['type'] == 'LEAVE_GAME':
                 other_players = GameRunner.get_other_player_ids(self.client_id)
