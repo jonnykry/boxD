@@ -64,7 +64,7 @@ class NameChangedMessage(Message):
 
 
 class BoardStateMessage(Message):
-    def __init__(self, edges, boxes):
+    def __init__(self, edges, boxes, client_color):
 
         edge_data = []
         box_data = []
@@ -102,6 +102,7 @@ class BoardStateMessage(Message):
         msg = {
             'type': 'board_state',
             'data': {
+                'your_color': client_color,
                 'edges': edge_data,
                 'boxes': box_data
             }
